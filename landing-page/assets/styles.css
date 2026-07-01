@@ -138,7 +138,7 @@ p{margin:0}
 .hero h1 .hl{color:var(--indigo-500);transition:color .5s var(--ease)}
 .hero.creator-view h1 .hl{color:var(--coral-500)}
 .hero .lead{margin-top:22px;max-width:520px}
-.hero-cta{display:flex;gap:14px;margin-top:32px;flex-wrap:wrap}
+.hero-cta{display:flex;gap:14px;margin-top:32px;margin-bottom: 32px; flex-wrap:wrap}
 .hero-meta{display:flex;align-items:center;gap:10px;margin-top:24px;color:var(--muted);
   font-size:.9rem}
 .hero-meta svg{width:18px;height:18px;color:var(--success)}

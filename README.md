@@ -98,3 +98,35 @@ For Stripe test mode, add your test keys to `.env` and set `PAYMENTS_MOCK=false`
 - **Connection refused:** Ensure MySQL is running in XAMPP/WAMP.
 - **Access denied:** Check username/password in `DATABASE_URL`.
 - **Database does not exist:** Create `myplyn` in phpMyAdmin before running migrations.
+
+## VPS deployment
+
+`git pull` alone is **not enough** — the React build (`client/dist/`) is not committed to git. After every pull you must rebuild and restart.
+
+```bash
+cd /path/to/myplyn
+git pull origin main
+npm run deploy          # install deps, build client, run migrations
+# restart your process manager, e.g.:
+pm2 restart myplyn
+# or: systemctl restart myplyn
+```
+
+Ensure `.env` on the VPS has:
+
+```env
+NODE_ENV=production
+PORT=4000
+CLIENT_URL=https://myplyn.com
+DATABASE_URL=mysql://user:pass@localhost:3306/myplyn
+```
+
+The server serves `client/dist` when `NODE_ENV=production`. If you use **nginx** as a reverse proxy, point the site root to the Node app (port 4000), not an old static folder.
+
+Quick check after deploy:
+
+```bash
+git log -1 --oneline          # confirm latest commit
+ls -la client/dist/index.html # confirm fresh build exists
+curl -s http://127.0.0.1:4000/api/v1/health
+```
