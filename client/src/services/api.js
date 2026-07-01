@@ -6,11 +6,33 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+const PUBLIC_PATHS = new Set([
+  '/',
+  '/how-it-works',
+  '/pricing',
+  '/about',
+  '/contact',
+  '/terms',
+  '/privacy',
+]);
+
+function isPublicPath(pathname) {
+  return PUBLIC_PATHS.has(pathname)
+    || pathname.startsWith('/auth')
+    || pathname === '/admin/login';
+}
+
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401 && !window.location.pathname.startsWith('/auth') && !window.location.pathname.startsWith('/admin/login')) {
-      const isAdmin = window.location.pathname.startsWith('/admin');
+    const pathname = window.location.pathname;
+    const isSessionCheck = err.config?.url?.includes('/auth/me');
+    if (
+      err.response?.status === 401
+      && !isSessionCheck
+      && !isPublicPath(pathname)
+    ) {
+      const isAdmin = pathname.startsWith('/admin');
       window.location.href = isAdmin ? '/admin/login' : '/auth/login';
     }
     return Promise.reject(err);

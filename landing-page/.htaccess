@@ -1,0 +1,16 @@
+Options +FollowSymLinks -MultiViews
+RewriteEngine On
+RewriteBase /
+
+# 1. Strip "index" or "index.html" from any URL and redirect to the root slash
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\s/(.*)index(\.html)?\sHTTP/ [NC]
+RewriteRule ^(.*)index(\.html)?$ /$1 [R=301,L]
+
+# 2. Redirect an explicit ".html" request to its extensionless counterpart
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\s/([^.]+)\.html\sHTTP/ [NC]
+RewriteRule ^([^.]+)\.html$ /$1 [R=301,L]
+
+# 3. Internally point the extensionless clean URL back to the hidden .html file
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*)$ $1.html [L]

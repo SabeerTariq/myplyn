@@ -3,20 +3,16 @@ import { Link, useNavigate, useSearchParams, Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { authApi } from '../../services/api';
 import Icon from '../../components/Icon';
-import BrandMark from '../../components/BrandMark';
-import { BRAND } from '../../config/brand';
+import AuthLayout from '../../layouts/AuthLayout';
 
 export function SignupRolePage() {
   const navigate = useNavigate();
   return (
-    <div className="min-h-screen flex items-center justify-center cc-animate-fade" style={{ background: 'var(--bg)', padding: 24 }}>
-      <div className="max-w-2xl w-full">
+    <AuthLayout active="signup">
+      <div className="w-full max-w-2xl">
         <div className="text-center" style={{ marginBottom: 32 }}>
-          <Link to="/" className="inline-flex items-center gap-[11px]" style={{ marginBottom: 24 }}>
-            <BrandMark size={36} fontSize={18} />
-            <span className="font-extrabold" style={{ fontSize: 18 }}>{BRAND.name}</span>
-          </Link>
           <h1 className="page-title" style={{ fontSize: 24 }}>Join as…</h1>
+          <p style={{ marginTop: 8, fontSize: 14, color: 'var(--text-2)' }}>Choose how you want to use the platform</p>
         </div>
         <div className="grid md:grid-cols-2 gap-4">
           {[
@@ -37,10 +33,11 @@ export function SignupRolePage() {
           ))}
         </div>
         <p className="text-center" style={{ marginTop: 24, fontSize: 13, color: 'var(--text-3)' }}>
-          Already have an account? <Link to="/auth/login" style={{ color: 'var(--accent-text)', fontWeight: 600 }}>Log in</Link>
+          Already have an account?{' '}
+          <Link to="/auth/login" style={{ color: 'var(--accent-text)', fontWeight: 600 }}>Log in</Link>
         </p>
       </div>
-    </div>
+    </AuthLayout>
   );
 }
 
@@ -66,7 +63,7 @@ export function SignupFormPage({ role }) {
   };
 
   return (
-    <AuthFormLayout title={`Sign up as ${role}`}>
+    <AuthFormLayout title={`Sign up as ${role}`} active="signup">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div><label className="label">Email</label><input type="email" className="input" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
         <div><label className="label">Password</label><input type="password" className="input" required minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></div>
@@ -82,6 +79,10 @@ export function SignupFormPage({ role }) {
         {error && <p style={{ color: 'var(--bad)', fontSize: 13 }}>{error}</p>}
         <button type="submit" className="btn-primary w-full justify-center" disabled={loading}>{loading ? 'Creating account…' : 'Create account'}</button>
       </form>
+      <p className="text-center" style={{ marginTop: 16, fontSize: 13, color: 'var(--text-3)' }}>
+        Already have an account?{' '}
+        <Link to="/auth/login" style={{ color: 'var(--accent-text)', fontWeight: 600 }}>Log in</Link>
+      </p>
     </AuthFormLayout>
   );
 }
@@ -108,12 +109,12 @@ export function LoginPage({ admin = false }) {
     setLoading(true);
     setError('');
     try {
-      const user = await login(form, admin);
-      if (!admin && !user.onboardingDone) {
-        navigate(user.role === 'ADVERTISER' ? '/advertiser/onboarding' : '/creator/onboarding');
+      const loggedIn = await login(form, admin);
+      if (!admin && !loggedIn.onboardingDone) {
+        navigate(loggedIn.role === 'ADVERTISER' ? '/advertiser/onboarding' : '/creator/onboarding');
         return;
       }
-      navigate(user.role === 'ADVERTISER' ? '/advertiser' : user.role === 'CREATOR' ? '/creator' : '/admin');
+      navigate(loggedIn.role === 'ADVERTISER' ? '/advertiser' : loggedIn.role === 'CREATOR' ? '/creator' : '/admin');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
     } finally {
@@ -121,20 +122,32 @@ export function LoginPage({ admin = false }) {
     }
   };
 
+  if (admin) {
+    return (
+      <AuthFormLayout title="Admin login" admin>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div><label className="label">Email</label><input type="email" className="input" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+          <div><label className="label">Password</label><input type="password" className="input" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></div>
+          {error && <p style={{ color: 'var(--bad)', fontSize: 13 }}>{error}</p>}
+          <button type="submit" className="btn-primary w-full justify-center" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
+        </form>
+      </AuthFormLayout>
+    );
+  }
+
   return (
-    <AuthFormLayout title={admin ? 'Admin Login' : 'Log in'} admin={admin}>
+    <AuthFormLayout title="Log in" active="login">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div><label className="label">Email</label><input type="email" className="input" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
         <div><label className="label">Password</label><input type="password" className="input" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></div>
-        {!admin && <Link to="/auth/forgot-password" style={{ fontSize: 13, color: 'var(--accent-text)' }}>Forgot password?</Link>}
+        <Link to="/auth/forgot-password" style={{ fontSize: 13, color: 'var(--accent-text)' }}>Forgot password?</Link>
         {error && <p style={{ color: 'var(--bad)', fontSize: 13 }}>{error}</p>}
         <button type="submit" className="btn-primary w-full justify-center" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
       </form>
-      {!admin && (
-        <p className="text-center" style={{ marginTop: 16, fontSize: 13, color: 'var(--text-3)' }}>
-          No account? <Link to="/auth/signup" style={{ color: 'var(--accent-text)', fontWeight: 600 }}>Sign up</Link>
-        </p>
-      )}
+      <p className="text-center" style={{ marginTop: 16, fontSize: 13, color: 'var(--text-3)' }}>
+        No account?{' '}
+        <Link to="/auth/signup" style={{ color: 'var(--accent-text)', fontWeight: 600 }}>Sign up</Link>
+      </p>
     </AuthFormLayout>
   );
 }
@@ -170,6 +183,9 @@ export function ForgotPasswordPage() {
           <button type="submit" className="btn-primary w-full justify-center" disabled={loading}>{loading ? 'Sending…' : 'Send reset link'}</button>
         </form>
       )}
+      <p className="text-center" style={{ marginTop: 16, fontSize: 13, color: 'var(--text-3)' }}>
+        <Link to="/auth/login" style={{ color: 'var(--accent-text)', fontWeight: 600 }}>Back to log in</Link>
+      </p>
     </AuthFormLayout>
   );
 }
@@ -184,21 +200,31 @@ export function ResetPasswordPage() {
         <button type="submit" className="btn-primary w-full justify-center">Update password</button>
         {!token && <p style={{ fontSize: 13, color: 'var(--warn)' }}>No token provided — use link from email.</p>}
       </form>
+      <p className="text-center" style={{ marginTop: 16, fontSize: 13, color: 'var(--text-3)' }}>
+        <Link to="/auth/login" style={{ color: 'var(--accent-text)', fontWeight: 600 }}>Back to log in</Link>
+      </p>
     </AuthFormLayout>
   );
 }
 
-function AuthFormLayout({ title, children, admin }) {
-  return (
-    <div className="min-h-screen flex items-center justify-center cc-animate-fade" style={{ background: 'var(--bg)', padding: 24 }}>
-      <div className="card w-full max-w-md">
-        <Link to={admin ? '/admin/login' : '/'} className="inline-flex items-center gap-[11px]" style={{ marginBottom: 24 }}>
-          <BrandMark />
-          <span className="font-extrabold" style={{ fontSize: '15.5px' }}>{BRAND.name}</span>
-        </Link>
-        <h1 className="section-title" style={{ fontSize: 20, marginBottom: 24 }}>{title}</h1>
-        {children}
-      </div>
+function AuthFormLayout({ title, children, admin, active }) {
+  const content = (
+    <div className="card w-full max-w-md">
+      <h1 className="section-title" style={{ fontSize: 20, marginBottom: 8 }}>{title}</h1>
+      <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 24 }}>
+        {active === 'login' ? 'Welcome back — sign in to continue' : active === 'signup' ? 'Create your free account' : admin ? 'Administrator access only' : ''}
+      </p>
+      {children}
     </div>
   );
+
+  if (admin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center cc-animate-fade" style={{ background: 'var(--bg)', padding: 24 }}>
+        {content}
+      </div>
+    );
+  }
+
+  return <AuthLayout active={active}>{content}</AuthLayout>;
 }

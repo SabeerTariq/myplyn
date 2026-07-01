@@ -47,6 +47,16 @@ app.use('/api/v1/taxonomy', taxonomyRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/stripe', stripeRoutes);
 
+// Serve the React build in production
+if (process.env.NODE_ENV === 'production') {
+  const clientDist = path.join(__dirname, '../../client/dist');
+  app.use(express.static(clientDist));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) return next();
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
+
 app.use(notFound);
 app.use(errorHandler);
 

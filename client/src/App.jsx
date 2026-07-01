@@ -2,9 +2,13 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './hooks/useAuth';
 import { ProtectedRoute, GuestRoute } from './routes/guards';
-import PublicLayout from './layouts/PublicLayout';
-
-import HomePage, { HowItWorksPage, PricingPage, AboutPage, ContactPage, TermsPage, PrivacyPage, NotFoundPage } from './pages/public/PublicPages';
+import LandingLayout from './landing/LandingLayout';
+import LandingHome from './landing/pages/LandingHome';
+import LandingHowItWorks from './landing/pages/LandingHowItWorks';
+import LandingPricing from './landing/pages/LandingPricing';
+import LandingAbout from './landing/pages/LandingAbout';
+import LandingContact from './landing/pages/LandingContact';
+import { TermsPage, PrivacyPage, NotFoundPage } from './landing/LandingLegal';
 import { SignupRolePage, SignupFormPage, LoginPage, ForgotPasswordPage, ResetPasswordPage } from './pages/auth/AuthPages';
 import { AdvertiserOnboarding, CreatorOnboarding } from './pages/onboarding/OnboardingPages';
 
@@ -39,12 +43,12 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             {/* Public */}
-            <Route element={<PublicLayout />}>
-              <Route index element={<HomePage />} />
-              <Route path="how-it-works" element={<HowItWorksPage />} />
-              <Route path="pricing" element={<PricingPage />} />
-              <Route path="about" element={<AboutPage />} />
-              <Route path="contact" element={<ContactPage />} />
+            <Route element={<LandingLayout />}>
+              <Route index element={<LandingHome />} />
+              <Route path="how-it-works" element={<LandingHowItWorks />} />
+              <Route path="pricing" element={<LandingPricing />} />
+              <Route path="about" element={<LandingAbout />} />
+              <Route path="contact" element={<LandingContact />} />
               <Route path="terms" element={<TermsPage />} />
               <Route path="privacy" element={<PrivacyPage />} />
             </Route>
@@ -117,7 +121,9 @@ export default function App() {
               <Route path="admin/settings" element={<AdminSettings />} />
             </Route>
 
-            <Route path="*" element={<NotFoundPage />} />
+            <Route element={<LandingLayout />}>
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
           </Routes>
         </BrowserRouter>
       </AuthProvider>
