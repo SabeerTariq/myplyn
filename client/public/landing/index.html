@@ -82,6 +82,7 @@ button{font-family:inherit;cursor:pointer;border:0}
 .header.scrolled{border-color:var(--line);box-shadow:var(--e1)}
 .header .container{display:flex;align-items:center;gap:16px;height:72px}
 .brand{display:flex;align-items:center;gap:11px;font-weight:900;font-size:1.5rem;color:var(--navy-d);letter-spacing:-.5px}
+.brand .logo-img{height:42px;width:auto;object-fit:contain}
 .logo-mark{width:44px;height:30px;position:relative;flex:none}
 .logo-mark svg{width:100%;height:100%;overflow:visible}
 .header .btn{padding:11px 22px;font-size:.95rem;margin-inline-start:auto}
@@ -100,6 +101,7 @@ button{font-family:inherit;cursor:pointer;border:0}
 .dots.a{top:90px;inset-inline-end:40px}.dots.b{bottom:60px;inset-inline-start:40px}
 
 .brand-lockup{text-align:center;margin-bottom:30px}
+.brand-lockup .logo-img{height:clamp(88px,18vw,120px);width:auto;margin:0 auto 8px;object-fit:contain}
 .brand-lockup .mark{width:110px;height:74px;margin:0 auto 8px}
 .brand-lockup .wordmark{font-weight:900;font-size:2.2rem;color:var(--navy-d);letter-spacing:1px}
 .pill{display:inline-flex;align-items:center;gap:9px;margin-top:12px;padding:9px 20px;border-radius:var(--r-pill);
@@ -120,14 +122,17 @@ button{font-family:inherit;cursor:pointer;border:0}
 .lead-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--e2);
   padding:28px;margin-top:30px;max-width:520px}
 .lead-card h2{font-size:1.4rem;font-weight:900;color:var(--ink);margin-bottom:18px}
-.field{position:relative;margin-bottom:14px}
-.field .fi{position:absolute;inset-inline-start:16px;top:50%;transform:translateY(-50%);width:22px;height:22px;color:var(--green);pointer-events:none}
-.field input{width:100%;height:58px;padding-inline-start:48px;padding-inline-end:18px;border:1.8px solid #E3EAF2;
-  border-radius:var(--r-md);font-family:inherit;font-size:1.05rem;font-weight:600;color:var(--ink);background:var(--bg-soft);transition:border .2s,box-shadow .2s,background .2s}
+.field{display:flex;align-items:center;gap:12px;height:58px;padding:0 16px;margin-bottom:14px;
+  border:1.8px solid #E3EAF2;border-radius:var(--r-md);background:var(--bg-soft);
+  transition:border .2s,box-shadow .2s,background .2s}
+.field .fi{position:static;flex:none;width:22px;height:22px;color:var(--green);pointer-events:none}
+.field input{flex:1;min-width:0;height:100%;border:0;background:transparent;padding:0;
+  font-family:inherit;font-size:1.05rem;font-weight:600;color:var(--ink);outline:none}
 .field input::placeholder{color:var(--muted);font-weight:600}
-.field input:focus{outline:none;border-color:var(--green);background:#fff;box-shadow:0 0 0 4px var(--green-50)}
-.field input.err{border-color:#E24C4C;box-shadow:0 0 0 4px #FDECEC}
-.field input[type=tel]{direction:ltr;text-align:right}
+.field:focus-within{border-color:var(--green);background:#fff;box-shadow:0 0 0 4px var(--green-50)}
+.field.err{border-color:#E24C4C;box-shadow:0 0 0 4px #FDECEC}
+.field input[type=tel]{direction:ltr;text-align:left;unicode-bidi:plaintext}
+.field input[type=text]{direction:rtl;text-align:right}
 .lead-card .btn{margin-top:6px;height:60px}
 .form-note{margin-top:14px;font-size:.82rem;color:var(--muted);text-align:center}
 .form-success{display:none;text-align:center;padding:14px 6px}
@@ -265,13 +270,7 @@ button{font-family:inherit;cursor:pointer;border:0}
 <header class="header">
   <div class="container">
     <a href="#" class="brand">
-      <span class="logo-mark">
-        <svg viewBox="0 0 60 40"><defs>
-          <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14357C"/><stop offset="1" stop-color="#1EA24C"/></linearGradient></defs>
-          <path d="M15 20c0-7 10-7 15 0s15 7 15 0-10-7-15 0-15 7-15 0Z" fill="none" stroke="url(#lg)" stroke-width="6" stroke-linecap="round"/>
-        </svg>
-      </span>
-      Myplyn
+      <img src="logo.jpeg" alt="Myplyn" class="logo-img" width="120" height="42">
     </a>
     <a href="#" class="btn btn-green wa-btn"><svg class="wa-ico" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.9 5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.7-1.2-4.5-4-4.6-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.7-.9c.2-.2.4-.2.6-.1l1.8.9c.2.1.4.2.4.3.1.2.1.7-.1 1.1Z"/></svg><span>تواصل معنا</span></a>
   </div>
@@ -283,13 +282,7 @@ button{font-family:inherit;cursor:pointer;border:0}
   <div class="container">
 
     <div class="brand-lockup reveal">
-      <div class="mark">
-        <svg viewBox="0 0 110 74"><defs>
-          <linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14357C"/><stop offset=".55" stop-color="#1E6E58"/><stop offset="1" stop-color="#2FB457"/></linearGradient></defs>
-          <path d="M22 37c0-15 22-15 33 0s33 15 33 0-22-15-33 0-33 15-33 0Z" fill="none" stroke="url(#lg2)" stroke-width="11" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="wordmark">MYPLYN</div>
+      <img src="logo.jpeg" alt="Myplyn" class="logo-img" width="200" height="120">
       <span class="pill">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><circle cx="17" cy="9" r="2.6"/><path d="M3 20a6 6 0 0 1 12 0M15 20a5 5 0 0 1 6-4"/></svg>
         لأصحاب الصفحات وصنّاع المحتوى
@@ -430,7 +423,7 @@ button{font-family:inherit;cursor:pointer;border:0}
 <footer class="footer">
   <div class="container">
     <div>
-      <a href="#" class="brand"><span class="logo-mark"><svg viewBox="0 0 60 40"><path d="M15 20c0-7 10-7 15 0s15 7 15 0-10-7-15 0-15 7-15 0Z" fill="none" stroke="#33C15E" stroke-width="6" stroke-linecap="round"/></svg></span>Myplyn</a>
+      <a href="#" class="brand"><img src="logo.jpeg" alt="Myplyn" class="logo-img" width="120" height="42"></a>
       <p class="f-about">ميبلين يربط أصحاب الصفحات وصنّاع المحتوى بالمعلنين — حوّل جمهورك إلى دخل حقيقي.</p>
       <div class="f-soc">
         <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
@@ -440,7 +433,7 @@ button{font-family:inherit;cursor:pointer;border:0}
     </div>
     <div class="f-contact">
       <a href="#" class="wa-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.9 5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.7-1.2-4.5-4-4.6-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.7-.9c.2-.2.4-.2.6-.1l1.8.9c.2.1.4.2.4.3.1.2.1.7-.1 1.1Z"/></svg> تواصل عبر واتساب</a>
-      <a href="mailto:hello@myplyn.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg> hello@myplyn.com</a>
+      <a href="mailto:contactmuhammadharis22@gmail.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg> contactmuhammadharis22@gmail.com</a>
     </div>
   </div>
   <div class="container footer-bottom">© <span id="year">2026</span> Myplyn. جميع الحقوق محفوظة.</div>
@@ -450,8 +443,9 @@ button{font-family:inherit;cursor:pointer;border:0}
 
 <script>
 /* ===== CONFIG — set these ===== */
-const WHATSAPP = '9665XXXXXXXX';          // e.g. 966512345678 (no +, no spaces)
-const LEAD_ENDPOINT = '';                  // Google Sheet webhook / Formspree / your API. Empty = skip network send.
+const WHATSAPP = '972525991923';
+const LEAD_EMAIL = 'contactmuhammadharis22@gmail.com';
+const LEAD_ENDPOINT = 'https://formsubmit.co/ajax/' + encodeURIComponent(LEAD_EMAIL);
 
 /* ===== header shadow on scroll ===== */
 const header = document.querySelector('.header');
@@ -474,7 +468,12 @@ const success = document.getElementById('leadSuccess');
 const nameEl = document.getElementById('fullName');
 const phoneEl = document.getElementById('phone');
 
-function invalid(el){ el.classList.add('err'); el.focus(); setTimeout(()=>el.classList.remove('err'),2000); }
+function invalid(el){
+  const field = el.closest('.field');
+  field.classList.add('err');
+  el.focus();
+  setTimeout(() => field.classList.remove('err'), 2000);
+}
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -488,13 +487,21 @@ form.addEventListener('submit', async (e) => {
   if(typeof gtag === 'function') gtag('event','generate_lead',{method:'landing_form'});
   window.dataLayer = window.dataLayer || []; window.dataLayer.push({event:'lead_submit'});
 
-  // ---- send to your side (Sheet / CRM / API) ----
-  if(LEAD_ENDPOINT){
-    try{
-      await fetch(LEAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({fullName:name,phone:phone,source:'landing',ts:new Date().toISOString()})});
-    }catch(err){ console.warn('lead send failed', err); }
-  }
+  // ---- send lead to email via FormSubmit ----
+  try{
+    await fetch(LEAD_ENDPOINT,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({
+        _subject:'Myplyn Landing — تسجيل جديد',
+        _template:'table',
+        fullName:name,
+        phone:phone,
+        source:'landing',
+        ts:new Date().toISOString(),
+      }),
+    });
+  }catch(err){ console.warn('lead send failed', err); }
 
   // ---- success state + prefilled WhatsApp ----
   document.getElementById('waSuccess').href =
