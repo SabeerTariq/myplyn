@@ -50,9 +50,18 @@ app.use('/api/v1/stripe', stripeRoutes);
 // Serve the React build in production
 if (process.env.NODE_ENV === 'production') {
   const clientDist = path.join(__dirname, '../../client/dist');
+  const standaloneLanding = path.join(clientDist, 'landing/index.html');
+
+  app.get('/landing', (req, res) => {
+    res.sendFile(standaloneLanding);
+  });
+
   app.use(express.static(clientDist));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) return next();
+    if (req.path === '/landing' || req.path.startsWith('/landing/')) {
+      return res.sendFile(standaloneLanding);
+    }
     res.sendFile(path.join(clientDist, 'index.html'));
   });
 }

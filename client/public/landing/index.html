@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Myplyn — حوّل صفحتك إلى مصدر دخل حقيقي</title>
+<meta name="description" content="ميبلين يربط أصحاب الصفحات وصنّاع المحتوى بالمعلنين. سجّل صفحاتك، استقبل عروض الإعلانات، واربح من تأثيرك.">
+
+<!-- ============================================================
+     DEV TODOs (hand these to the team):
+     1) Replace the SVG logo mark below with the official Myplyn logo (assets/logo.svg).
+     2) Optional: drop the ad character image at assets/hero-character.png to match the creative 1:1.
+     3) Set the WhatsApp number  -> const WHATSAPP = '9665XXXXXXXX';
+     4) Set lead endpoint (Google Sheet / Formspree / your API) -> const LEAD_ENDPOINT = '';
+     5) Paste GA4 + Meta Pixel IDs where marked, to start collecting marketing data.
+     ============================================================ -->
+
+<!-- ==== Meta Pixel (paste your PIXEL_ID) ==== -->
+<!--
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','PIXEL_ID'); fbq('track','PageView');
+</script>
+-->
+
+<!-- ==== GA4 (paste your G-XXXXXXX id) ==== -->
+<!--
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}
+gtag('js',new Date());gtag('config','G-XXXXXXX');</script>
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#1EA24C; --green-d:#16833D; --green-l:#33C15E; --green-50:#E9F7EE; --green-100:#CFEEDA;
+  --navy:#14357C; --navy-d:#0E2A5E; --navy-l:#23509E; --navy-50:#EEF3FB;
+  --ink:#0E2A5E; --text:#37485F; --muted:#71809A;
+  --bg:#FFFFFF; --bg-soft:#F4F9F6; --line:#E6EDEA;
+  --r-md:14px; --r-lg:20px; --r-xl:28px; --r-pill:999px;
+  --e1:0 2px 10px rgba(14,42,94,.06); --e2:0 14px 40px rgba(14,42,94,.12); --e3:0 30px 70px rgba(14,42,94,.20);
+  --grad-brand:linear-gradient(120deg,var(--navy-d) 0%,var(--navy) 42%,var(--green) 100%);
+  --grad-green:linear-gradient(135deg,var(--green) 0%,var(--green-l) 100%);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:'Cairo',system-ui,sans-serif;color:var(--text);background:var(--bg);
+  line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3{margin:0;color:var(--ink);line-height:1.2;font-weight:800}
+p{margin:0}
+a{text-decoration:none;color:inherit}
+img,svg{display:block;max-width:100%}
+button{font-family:inherit;cursor:pointer;border:0}
+:focus-visible{outline:3px solid var(--green-100);outline-offset:2px;border-radius:8px}
+.container{width:100%;max-width:1180px;margin-inline:auto;padding-inline:22px}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-weight:800;
+  font-size:1.05rem;padding:15px 30px;border-radius:var(--r-pill);transition:transform .25s var(--ease),box-shadow .25s var(--ease),background .25s}
+.btn svg{width:20px;height:20px}
+.btn-green{background:var(--grad-green);color:#fff;box-shadow:0 10px 26px rgba(30,162,76,.34);position:relative;overflow:hidden}
+.btn-green::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);
+  transform:translateX(-120%);transition:transform .7s var(--ease)}
+.btn-green:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(30,162,76,.44)}
+.btn-green:hover::after{transform:translateX(120%)}
+.btn-navy{background:var(--navy);color:#fff;box-shadow:0 10px 26px rgba(20,53,124,.3)}
+.btn-navy:hover{transform:translateY(-2px);background:var(--navy-d)}
+.btn-outline{background:#fff;color:var(--navy);box-shadow:inset 0 0 0 2px var(--navy-50)}
+.btn-outline:hover{box-shadow:inset 0 0 0 2px var(--green-100);transform:translateY(-2px)}
+.btn-block{width:100%}
+
+/* ---------- header ---------- */
+.header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);
+  border-bottom:1px solid transparent;transition:border-color .3s,box-shadow .3s}
+.header.scrolled{border-color:var(--line);box-shadow:var(--e1)}
+.header .container{display:flex;align-items:center;gap:16px;height:72px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:900;font-size:1.5rem;color:var(--navy-d);letter-spacing:-.5px}
+.logo-mark{width:44px;height:30px;position:relative;flex:none}
+.logo-mark svg{width:100%;height:100%;overflow:visible}
+.header .btn{padding:11px 22px;font-size:.95rem;margin-inline-start:auto}
+.wa-ico{width:20px;height:20px}
+
+/* ---------- hero ---------- */
+.hero{position:relative;padding:46px 0 70px;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:-1;overflow:hidden}
+.ring{position:absolute;border-radius:50%;filter:blur(2px);opacity:.6}
+.ring.g{width:420px;height:420px;top:-150px;inset-inline-start:-120px;
+  background:radial-gradient(circle at 40% 40%,rgba(51,193,94,.30),transparent 62%)}
+.ring.n{width:460px;height:460px;bottom:-180px;inset-inline-end:-150px;
+  background:radial-gradient(circle at 50% 50%,rgba(35,80,158,.22),transparent 62%)}
+.dots{position:absolute;width:150px;height:150px;opacity:.5;
+  background-image:radial-gradient(var(--navy-50) 2px,transparent 2px);background-size:16px 16px}
+.dots.a{top:90px;inset-inline-end:40px}.dots.b{bottom:60px;inset-inline-start:40px}
+
+.brand-lockup{text-align:center;margin-bottom:30px}
+.brand-lockup .mark{width:110px;height:74px;margin:0 auto 8px}
+.brand-lockup .wordmark{font-weight:900;font-size:2.2rem;color:var(--navy-d);letter-spacing:1px}
+.pill{display:inline-flex;align-items:center;gap:9px;margin-top:12px;padding:9px 20px;border-radius:var(--r-pill);
+  background:#fff;border:1.5px solid var(--green-100);color:var(--green-d);font-weight:700;font-size:.98rem;box-shadow:var(--e1)}
+.pill svg{width:20px;height:20px;color:var(--green)}
+
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:50px;align-items:center}
+.hero h1{font-size:clamp(2.3rem,5vw,3.7rem);font-weight:900}
+.hero h1 .g{color:var(--green)}
+.hero .sub{margin-top:22px;font-size:1.18rem;color:var(--text);max-width:520px}
+.hero .sub .b{font-weight:800;color:var(--ink)}
+.hero .sub .join{font-weight:900;color:var(--green);font-size:1.3rem;display:inline-block;margin:2px 0}
+.trust-row{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:22px}
+.trust-row span{display:flex;align-items:center;gap:8px;color:var(--navy);font-weight:700;font-size:.95rem}
+.trust-row svg{width:20px;height:20px;color:var(--green)}
+
+/* ---------- lead form card ---------- */
+.lead-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--e2);
+  padding:28px;margin-top:30px;max-width:520px}
+.lead-card h2{font-size:1.4rem;font-weight:900;color:var(--ink);margin-bottom:18px}
+.field{position:relative;margin-bottom:14px}
+.field .fi{position:absolute;inset-inline-start:16px;top:50%;transform:translateY(-50%);width:22px;height:22px;color:var(--green);pointer-events:none}
+.field input{width:100%;height:58px;padding-inline-start:48px;padding-inline-end:18px;border:1.8px solid #E3EAF2;
+  border-radius:var(--r-md);font-family:inherit;font-size:1.05rem;font-weight:600;color:var(--ink);background:var(--bg-soft);transition:border .2s,box-shadow .2s,background .2s}
+.field input::placeholder{color:var(--muted);font-weight:600}
+.field input:focus{outline:none;border-color:var(--green);background:#fff;box-shadow:0 0 0 4px var(--green-50)}
+.field input.err{border-color:#E24C4C;box-shadow:0 0 0 4px #FDECEC}
+.field input[type=tel]{direction:ltr;text-align:right}
+.lead-card .btn{margin-top:6px;height:60px}
+.form-note{margin-top:14px;font-size:.82rem;color:var(--muted);text-align:center}
+.form-success{display:none;text-align:center;padding:14px 6px}
+.form-success .ok{width:70px;height:70px;margin:0 auto 14px;border-radius:50%;background:var(--green-50);
+  display:grid;place-items:center;color:var(--green);animation:pop .5s var(--ease)}
+.form-success .ok svg{width:38px;height:38px}
+.form-success h3{color:var(--ink);font-size:1.35rem;margin-bottom:8px}
+.form-success p{color:var(--text)}
+.form-success .btn{margin-top:18px}
+@keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+
+/* ---------- hero visual ---------- */
+.hero-visual{position:relative;display:grid;place-items:center;min-height:440px}
+.visual-glow{position:absolute;width:340px;height:340px;border-radius:50%;
+  background:radial-gradient(circle,rgba(51,193,94,.22),transparent 65%);filter:blur(6px)}
+.phone{position:relative;width:290px;background:var(--navy-d);border-radius:38px;padding:12px;
+  box-shadow:var(--e3);z-index:2}
+.phone-screen{background:#0B1F45;border-radius:28px;padding:20px 18px;color:#fff;overflow:hidden}
+.ph-top{display:flex;justify-content:space-between;align-items:center;color:#9fb3d6;font-size:.78rem;margin-bottom:14px}
+.ph-earn-label{color:#9fb3d6;font-size:.85rem}
+.ph-earn{font-size:2.2rem;font-weight:900;color:#fff;direction:ltr;text-align:right;margin-top:2px}
+.ph-earn .cur{color:var(--green-l)}
+.ph-chart{height:78px;margin:14px 0 16px}
+.ph-chart svg{width:100%;height:100%}
+.ph-item{display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.06);border-radius:14px;padding:10px 12px;margin-bottom:9px}
+.ph-item .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none}
+.ph-item .nm{font-size:.82rem;font-weight:700;color:#fff}
+.ph-item .st{font-size:.68rem;color:var(--green-l);font-weight:700}
+.ph-item .amt{margin-inline-start:auto;font-weight:800;color:#fff;direction:ltr}
+
+/* floating social badges */
+.badge{position:absolute;background:#fff;border-radius:16px;box-shadow:var(--e2);z-index:3;
+  display:flex;align-items:center;gap:8px;padding:11px 14px;font-weight:800;color:var(--navy-d)}
+.badge svg{width:22px;height:22px}
+.badge.play{inset-inline-start:6px;top:60px;animation:float 5s ease-in-out infinite}
+.badge.like{inset-inline-end:0;top:36px;color:#fff;background:var(--navy);animation:float 6s ease-in-out infinite .4s}
+.badge.thumb{inset-inline-end:18px;bottom:70px;animation:float 5.5s ease-in-out infinite .8s}
+.badge.play .p{width:30px;height:30px;border-radius:9px;background:var(--grad-green);display:grid;place-items:center;color:#fff}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+
+/* ---------- tagline band ---------- */
+.band{background:var(--grad-brand);color:#fff;text-align:center;padding:34px 22px;position:relative;overflow:hidden}
+.band::before{content:"";position:absolute;width:300px;height:300px;border-radius:50%;
+  background:rgba(255,255,255,.08);top:-140px;inset-inline-start:-60px}
+.band p{position:relative;font-size:clamp(1.2rem,2.6vw,1.7rem);font-weight:900;line-height:1.5}
+.band .hl{color:#8CF0AC}
+
+/* ---------- benefits ---------- */
+.section{padding:72px 0}
+.section-head{text-align:center;max-width:640px;margin:0 auto 46px}
+.section-head .ey{color:var(--green);font-weight:800;letter-spacing:1px;font-size:.9rem}
+.section-head h2{font-size:clamp(1.8rem,3.4vw,2.5rem);font-weight:900;margin-top:8px}
+.section-head p{margin-top:14px;color:var(--text);font-size:1.1rem}
+.benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.bcard{background:#fff;border:1px solid var(--line);border-radius:var(--r-xl);padding:30px;text-align:center;
+  box-shadow:var(--e1);transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.bcard:hover{transform:translateY(-6px);box-shadow:var(--e2)}
+.bcard .bic{width:64px;height:64px;border-radius:18px;margin:0 auto 18px;display:grid;place-items:center;
+  background:var(--green-50);color:var(--green)}
+.bcard .bic svg{width:32px;height:32px}
+.bcard h3{font-size:1.25rem;font-weight:900;margin-bottom:8px}
+.bcard p{color:var(--text)}
+
+/* steps */
+.steps{background:var(--bg-soft)}
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;counter-reset:s}
+.stp{background:#fff;border:1px solid var(--line);border-radius:var(--r-xl);padding:30px;position:relative;box-shadow:var(--e1)}
+.stp .num{counter-increment:s;width:50px;height:50px;border-radius:14px;background:var(--grad-green);color:#fff;
+  display:grid;place-items:center;font-weight:900;font-size:1.4rem;margin-bottom:16px}
+.stp .num::before{content:counter(s)}
+.stp h3{font-size:1.2rem;font-weight:900;margin-bottom:6px}
+.stp p{color:var(--text)}
+
+/* final cta */
+.cta{padding:76px 0}
+.cta-inner{background:var(--grad-brand);border-radius:var(--r-xl);padding:clamp(38px,6vw,64px);text-align:center;
+  color:#fff;position:relative;overflow:hidden;box-shadow:var(--e3)}
+.cta-inner::before,.cta-inner::after{content:"";position:absolute;border-radius:50%;filter:blur(8px)}
+.cta-inner::before{width:260px;height:260px;background:rgba(51,193,94,.4);top:-120px;inset-inline-end:-60px}
+.cta-inner::after{width:220px;height:220px;background:rgba(255,255,255,.1);bottom:-110px;inset-inline-start:-40px}
+.cta-inner h2{position:relative;color:#fff;font-size:clamp(1.8rem,3.6vw,2.6rem);font-weight:900}
+.cta-inner p{position:relative;margin:14px auto 0;max-width:480px;opacity:.92;font-size:1.1rem}
+.cta-actions{position:relative;display:flex;gap:14px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+
+/* footer */
+.footer{background:var(--navy-d);color:#aebdd7;padding:52px 0 28px}
+.footer .container{display:flex;justify-content:space-between;gap:26px;flex-wrap:wrap;align-items:flex-start}
+.footer .brand{color:#fff}
+.footer .f-about{max-width:320px;margin-top:14px;font-size:.95rem;color:#93a4c4}
+.f-soc{display:flex;gap:10px;margin-top:16px}
+.f-soc a{width:40px;height:40px;border-radius:11px;background:rgba(255,255,255,.08);display:grid;place-items:center;color:#cdd9ee;transition:.25s}
+.f-soc a:hover{background:var(--green);color:#fff}
+.f-soc svg{width:19px;height:19px}
+.f-contact a{display:flex;align-items:center;gap:10px;color:#cdd9ee;margin-bottom:12px;font-weight:600}
+.f-contact svg{width:20px;height:20px;color:var(--green-l)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);margin-top:34px;padding-top:20px;text-align:center;color:#7b8cab;font-size:.86rem}
+
+/* floating whatsapp */
+.wa-float{position:fixed;inset-inline-start:22px;bottom:22px;z-index:60;width:60px;height:60px;border-radius:50%;
+  background:#25D366;color:#fff;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.5);
+  animation:wapulse 2.4s infinite}
+.wa-float svg{width:32px;height:32px}
+@keyframes wapulse{0%{box-shadow:0 10px 30px rgba(37,211,102,.5),0 0 0 0 rgba(37,211,102,.5)}
+  70%{box-shadow:0 10px 30px rgba(37,211,102,.5),0 0 0 16px rgba(37,211,102,0)}
+  100%{box-shadow:0 10px 30px rgba(37,211,102,.5),0 0 0 0 rgba(37,211,102,0)}}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(28px)}
+.reveal.in{opacity:1;transform:none;transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+
+/* responsive */
+@media(max-width:900px){
+  .hero-grid{grid-template-columns:1fr;gap:36px}
+  .hero-visual{order:2;min-height:400px}
+  .lead-card{margin-inline:auto}
+  .benefits,.steps-grid{grid-template-columns:1fr}
+  .footer .container{flex-direction:column}
+}
+@media(max-width:560px){
+  .header .btn span{display:none}
+  .hero h1{font-size:2.1rem}
+  .brand-lockup .wordmark{font-size:1.8rem}
+  .lead-card{padding:22px}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+  <div class="container">
+    <a href="#" class="brand">
+      <span class="logo-mark">
+        <svg viewBox="0 0 60 40"><defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14357C"/><stop offset="1" stop-color="#1EA24C"/></linearGradient></defs>
+          <path d="M15 20c0-7 10-7 15 0s15 7 15 0-10-7-15 0-15 7-15 0Z" fill="none" stroke="url(#lg)" stroke-width="6" stroke-linecap="round"/>
+        </svg>
+      </span>
+      Myplyn
+    </a>
+    <a href="#" class="btn btn-green wa-btn"><svg class="wa-ico" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.9 5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.7-1.2-4.5-4-4.6-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.7-.9c.2-.2.4-.2.6-.1l1.8.9c.2.1.4.2.4.3.1.2.1.7-.1 1.1Z"/></svg><span>تواصل معنا</span></a>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-bg"><span class="ring g"></span><span class="ring n"></span><span class="dots a"></span><span class="dots b"></span></div>
+  <div class="container">
+
+    <div class="brand-lockup reveal">
+      <div class="mark">
+        <svg viewBox="0 0 110 74"><defs>
+          <linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14357C"/><stop offset=".55" stop-color="#1E6E58"/><stop offset="1" stop-color="#2FB457"/></linearGradient></defs>
+          <path d="M22 37c0-15 22-15 33 0s33 15 33 0-22-15-33 0-33 15-33 0Z" fill="none" stroke="url(#lg2)" stroke-width="11" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="wordmark">MYPLYN</div>
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><circle cx="17" cy="9" r="2.6"/><path d="M3 20a6 6 0 0 1 12 0M15 20a5 5 0 0 1 6-4"/></svg>
+        لأصحاب الصفحات وصنّاع المحتوى
+      </span>
+    </div>
+
+    <div class="hero-grid">
+      <div class="hero-content">
+        <h1 class="reveal">حوّل صفحتك إلى <span class="g">مصدر دخل حقيقي</span></h1>
+        <p class="sub reveal d1">
+          <span class="b">عندك صفحة؟ خلّيها تشتغل إلك.</span><br>
+          إذا عندك جمهور بتابعك وبتفاعل معك،<br>
+          <span class="join">انضم إلى Myplyn</span><br>
+          وابدأ تستقبل إعلانات من مصالح ومعلنين. أنت بتختار اللي بتناسب صفحتك وجمهورك.
+        </p>
+        <div class="trust-row reveal d2">
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> مجاني للانضمام</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> أنت تختار الإعلانات</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> استلم أرباحك بسهولة</span>
+        </div>
+
+        <!-- LEAD FORM -->
+        <div class="lead-card reveal d2" id="register">
+          <form id="leadForm" novalidate>
+            <h2>سجّل اليوم وابدأ تربح من تأثيرك.</h2>
+            <div class="field">
+              <svg class="fi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+              <input type="text" id="fullName" name="fullName" placeholder="الاسم الكامل" autocomplete="name">
+            </div>
+            <div class="field">
+              <svg class="fi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24 11 11 0 0 0 3.5.56 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11 11 0 0 0 .56 3.5 1 1 0 0 1-.24 1Z"/></svg>
+              <input type="tel" id="phone" name="phone" placeholder="رقم الهاتف" autocomplete="tel" inputmode="tel">
+            </div>
+            <button type="submit" class="btn btn-green btn-block">سجّل الآن
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg></button>
+            <p class="form-note">بالتسجيل أنت توافق على أن يتواصل معك فريق ميبلين.</p>
+          </form>
+          <div class="form-success" id="leadSuccess">
+            <div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+            <h3>تم استلام بياناتك! 🎉</h3>
+            <p>شكرًا لك. سيتواصل معك فريق ميبلين قريبًا لإكمال التسجيل.</p>
+            <a href="#" class="btn btn-navy wa-btn" id="waSuccess"><svg class="wa-ico" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.9 5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.7-1.2-4.5-4-4.6-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.7-.9c.2-.2.4-.2.6-.1l1.8.9c.2.1.4.2.4.3.1.2.1.7-.1 1.1Z"/></svg> أكمل عبر واتساب</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- HERO VISUAL -->
+      <div class="hero-visual reveal d1">
+        <span class="visual-glow"></span>
+        <div class="badge play"><span class="p"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span> فيديو</div>
+        <div class="badge like"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9A5 5 0 0 1 12 6a5 5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9Z"/></svg> 1K</div>
+        <div class="badge thumb"><svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2"><path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3Zm0 0 4-8a2.5 2.5 0 0 1 2.5 3L13 9h5.5a2 2 0 0 1 2 2.4l-1.3 6A2 2 0 0 1 17.2 20H7"/></svg></div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="ph-top"><span>الأرباح</span><span>هذا الشهر ▾</span></div>
+            <div class="ph-earn-label">إجمالي الأرباح</div>
+            <div class="ph-earn"><span class="cur">$</span>4,250</div>
+            <div class="ph-chart">
+              <svg viewBox="0 0 260 78" preserveAspectRatio="none">
+                <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#33C15E" stop-opacity=".5"/><stop offset="1" stop-color="#33C15E" stop-opacity="0"/></linearGradient></defs>
+                <path d="M0 60 C30 54 44 38 70 42 C104 47 116 20 150 26 C188 33 210 12 260 14 L260 78 L0 78 Z" fill="url(#ag)"/>
+                <path d="M0 60 C30 54 44 38 70 42 C104 47 116 20 150 26 C188 33 210 12 260 14" fill="none" stroke="#33C15E" stroke-width="3" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="ph-item"><span class="ic" style="background:#E4405F"><svg viewBox="0 0 24 24" fill="#fff" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="#fff" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="#fff" stroke-width="2"/></svg></span><div><div class="nm">حملة إنستغرام</div><div class="st">مكتملة</div></div><span class="amt">$1,250</span></div>
+            <div class="ph-item"><span class="ic" style="background:#111"><svg viewBox="0 0 24 24" fill="#fff" width="16" height="16"><path d="M16 3c.3 2.1 1.6 3.7 3.8 4v3c-1.4 0-2.7-.4-3.8-1.1V15a5.5 5.5 0 1 1-5.5-5.5c.3 0 .6 0 .9.1v3.1a2.5 2.5 0 1 0 1.8 2.4V3z"/></svg></span><div><div class="nm">حملة تيك توك</div><div class="st">مكتملة</div></div><span class="amt">$950</span></div>
+            <div class="ph-item"><span class="ic" style="background:#FF0000"><svg viewBox="0 0 24 24" fill="#fff" width="18" height="18"><path d="M23 12s0-3-.4-4.4a2.5 2.5 0 0 0-1.8-1.8C19.4 5.4 12 5.4 12 5.4s-7.4 0-8.8.4A2.5 2.5 0 0 0 1.4 7.6C1 9 1 12 1 12s0 3 .4 4.4a2.5 2.5 0 0 0 1.8 1.8c1.4.4 8.8.4 8.8.4s7.4 0 8.8-.4a2.5 2.5 0 0 0 1.8-1.8C23 15 23 12 23 12z"/><path d="M10 9l5 3-5 3z" fill="#0B1F45"/></svg></span><div><div class="nm">حملة يوتيوب</div><div class="st">مكتملة</div></div><span class="amt">$2,050</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TAGLINE BAND ===== -->
+<div class="band">
+  <p>صفحتك مش بس متابعين... <span class="hl">صفحتك ممكن تكون مصدر دخل.</span></p>
+</div>
+
+<!-- ===== BENEFITS ===== -->
+<section class="section">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="ey">لماذا ميبلين</div>
+      <h2>كل شيء بسيط، شفّاف، وفي صالحك</h2>
+      <p>صُمّم ميبلين ليجعل الربح من صفحاتك سهلاً وآمناً — من التسجيل حتى استلام أرباحك.</p>
+    </div>
+    <div class="benefits">
+      <div class="bcard reveal">
+        <div class="bic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <h3>مجاني تماماً</h3>
+        <p>سجّل واربط صفحاتك بدون أي رسوم اشتراك. لا تدفع شيئاً للانضمام أو التصفّح.</p>
+      </div>
+      <div class="bcard reveal d1">
+        <div class="bic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 11 3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></div>
+        <h3>أنت صاحب القرار</h3>
+        <p>استقبل عروض الإعلانات ووافق فقط على ما يناسب صفحتك وجمهورك. أنت من يختار.</p>
+      </div>
+      <div class="bcard reveal d2">
+        <div class="bic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/><path d="M6 15h4"/></svg></div>
+        <h3>أرباح مضمونة</h3>
+        <p>بعد نشر الإعلان واعتماده، تُحوّل أرباحك بسرعة وأمان إلى حسابك.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STEPS ===== -->
+<section class="section steps">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="ey">ابدأ بـ٣ خطوات</div>
+      <h2>من التسجيل إلى أول ربح</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="stp reveal"><div class="num"></div><h3>سجّل بياناتك</h3><p>أدخل اسمك ورقم هاتفك، وسيتواصل معك فريقنا لإكمال إنشاء حسابك.</p></div>
+      <div class="stp reveal d1"><div class="num"></div><h3>اربط صفحاتك</h3><p>اربط حساباتك على إنستغرام وتيك توك ويوتيوب وفيسبوك بسهولة، ويتعرّف النظام على صفحاتك تلقائياً.</p></div>
+      <div class="stp reveal d2"><div class="num"></div><h3>استلم العروض واربح</h3><p>تصلك عروض إعلانات تناسب جمهورك. وافق على ما يعجبك، وابدأ تربح من تأثيرك.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FINAL CTA ===== -->
+<section class="cta">
+  <div class="container">
+    <div class="cta-inner reveal">
+      <h2>جاهز تحوّل صفحتك إلى مصدر دخل؟</h2>
+      <p>انضم إلى ميبلين اليوم وابدأ باستقبال عروض من معلنين يبحثون عن صفحات مثل صفحتك.</p>
+      <div class="cta-actions">
+        <a href="#register" class="btn btn-green">سجّل الآن مجاناً</a>
+        <a href="#" class="btn btn-outline wa-btn">تواصل عبر واتساب</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container">
+    <div>
+      <a href="#" class="brand"><span class="logo-mark"><svg viewBox="0 0 60 40"><path d="M15 20c0-7 10-7 15 0s15 7 15 0-10-7-15 0-15 7-15 0Z" fill="none" stroke="#33C15E" stroke-width="6" stroke-linecap="round"/></svg></span>Myplyn</a>
+      <p class="f-about">ميبلين يربط أصحاب الصفحات وصنّاع المحتوى بالمعلنين — حوّل جمهورك إلى دخل حقيقي.</p>
+      <div class="f-soc">
+        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+        <a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 3c.3 2.1 1.6 3.7 3.8 4v3c-1.4 0-2.7-.4-3.8-1.1V15a5.5 5.5 0 1 1-5.5-5.5c.3 0 .6 0 .9.1v3.1a2.5 2.5 0 1 0 1.8 2.4V3z"/></svg></a>
+        <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12s0-3-.4-4.4a2.5 2.5 0 0 0-1.8-1.8C19.4 5.4 12 5.4 12 5.4s-7.4 0-8.8.4A2.5 2.5 0 0 0 1.4 7.6C1 9 1 12 1 12s0 3 .4 4.4a2.5 2.5 0 0 0 1.8 1.8c1.4.4 8.8.4 8.8.4s7.4 0 8.8-.4a2.5 2.5 0 0 0 1.8-1.8C23 15 23 12 23 12z"/><path d="M10 9l5 3-5 3z" fill="#0E2A5E"/></svg></a>
+      </div>
+    </div>
+    <div class="f-contact">
+      <a href="#" class="wa-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.9 5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.7-1.2-4.5-4-4.6-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.7-.9c.2-.2.4-.2.6-.1l1.8.9c.2.1.4.2.4.3.1.2.1.7-.1 1.1Z"/></svg> تواصل عبر واتساب</a>
+      <a href="mailto:hello@myplyn.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg> hello@myplyn.com</a>
+    </div>
+  </div>
+  <div class="container footer-bottom">© <span id="year">2026</span> Myplyn. جميع الحقوق محفوظة.</div>
+</footer>
+
+<a href="#" class="wa-float wa-btn" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.9 5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.7-1.2-4.5-4-4.6-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.7-.9c.2-.2.4-.2.6-.1l1.8.9c.2.1.4.2.4.3.1.2.1.7-.1 1.1Z"/></svg></a>
+
+<script>
+/* ===== CONFIG — set these ===== */
+const WHATSAPP = '9665XXXXXXXX';          // e.g. 966512345678 (no +, no spaces)
+const LEAD_ENDPOINT = '';                  // Google Sheet webhook / Formspree / your API. Empty = skip network send.
+
+/* ===== header shadow on scroll ===== */
+const header = document.querySelector('.header');
+addEventListener('scroll', () => header.classList.toggle('scrolled', scrollY > 8), {passive:true});
+
+/* ===== year ===== */
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ===== WhatsApp links ===== */
+const waBase = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent('مرحباً، أريد التسجيل في Myplyn وتحويل صفحتي إلى مصدر دخل.');
+document.querySelectorAll('.wa-btn').forEach(a => { if(a.tagName==='A') a.href = waBase; });
+
+/* ===== reveal on scroll ===== */
+const io = new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* ===== lead form ===== */
+const form = document.getElementById('leadForm');
+const success = document.getElementById('leadSuccess');
+const nameEl = document.getElementById('fullName');
+const phoneEl = document.getElementById('phone');
+
+function invalid(el){ el.classList.add('err'); el.focus(); setTimeout(()=>el.classList.remove('err'),2000); }
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = nameEl.value.trim();
+  const phone = phoneEl.value.replace(/[^\d+]/g,'');
+  if(name.length < 2){ return invalid(nameEl); }
+  if(phone.length < 7){ return invalid(phoneEl); }
+
+  // ---- marketing tracking (fires if GA4 / Pixel are configured) ----
+  if(typeof fbq === 'function') fbq('track','Lead',{content_name:'Creator Signup'});
+  if(typeof gtag === 'function') gtag('event','generate_lead',{method:'landing_form'});
+  window.dataLayer = window.dataLayer || []; window.dataLayer.push({event:'lead_submit'});
+
+  // ---- send to your side (Sheet / CRM / API) ----
+  if(LEAD_ENDPOINT){
+    try{
+      await fetch(LEAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({fullName:name,phone:phone,source:'landing',ts:new Date().toISOString()})});
+    }catch(err){ console.warn('lead send failed', err); }
+  }
+
+  // ---- success state + prefilled WhatsApp ----
+  document.getElementById('waSuccess').href =
+    'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent('مرحباً، اسمي ' + name + ' ورقمي ' + phone + '. أريد إكمال التسجيل في Myplyn.');
+  form.style.display = 'none';
+  success.style.display = 'block';
+  success.scrollIntoView({behavior:'smooth',block:'center'});
+});
+</script>
+</body>
+</html>
