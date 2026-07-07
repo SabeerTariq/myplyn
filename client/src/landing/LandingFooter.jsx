@@ -4,14 +4,14 @@ import { BrandLogo } from './LandingLayout';
 
 export default function LandingFooter() {
   const year = new Date().getFullYear();
+  const goTop = () => window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
 
   return (
     <footer className="footer">
       <div className="container">
         <div className="f-brand">
-          <Link to="/" className="brand">
-            <span className="logo"><BrandLogo /></span>
-            {BRAND.name}
+          <Link to="/" onClick={goTop} className="brand brand-image-only">
+            <BrandLogo height={52} />
           </Link>
           <p className="f-about">
             The marketplace that connects brands with vetted creators across six platforms — with payments held safely until the work is done.
@@ -32,20 +32,20 @@ export default function LandingFooter() {
         </div>
         <div className="f-col">
           <h4>Product</h4>
-          <Link to="/how-it-works">How it works</Link>
-          <Link to="/pricing">Pricing</Link>
-          <Link to="/#brands">For brands</Link>
-          <Link to="/#creators">For creators</Link>
+          <Link to="/how-it-works" onClick={goTop}>How it works</Link>
+          <Link to="/pricing" onClick={goTop}>Pricing</Link>
+          <Link to="/" onClick={goTop}>For brands</Link>
+          <Link to="/" onClick={goTop}>For creators</Link>
         </div>
         <div className="f-col">
           <h4>Company</h4>
-          <Link to="/about">About us</Link>
-          <Link to="/contact">Contact</Link>
+          <Link to="/about" onClick={goTop}>About us</Link>
+          <Link to="/contact" onClick={goTop}>Contact</Link>
         </div>
         <div className="f-col">
           <h4>Legal</h4>
-          <Link to="/terms">Terms</Link>
-          <Link to="/privacy">Privacy</Link>
+          <Link to="/terms" onClick={goTop}>Terms</Link>
+          <Link to="/privacy" onClick={goTop}>Privacy</Link>
         </div>
         <div className="f-news">
           <h4>Stay in the loop</h4>

@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { BRAND } from '../config/brand';
 import BrandMark from '../components/BrandMark';
 
 export function AuthHeader({ active }) {
@@ -7,8 +6,7 @@ export function AuthHeader({ active }) {
     <header style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
       <div className="max-w-6xl mx-auto flex items-center justify-between" style={{ padding: '16px 24px' }}>
         <Link to="/" className="flex items-center gap-[11px]">
-          <BrandMark />
-          <span className="font-extrabold" style={{ fontSize: '15.5px', letterSpacing: '-0.02em' }}>{BRAND.name}</span>
+          <BrandMark size={40} />
         </Link>
         <nav className="hidden sm:flex items-center gap-5" style={{ fontSize: 14, color: 'var(--text-2)' }}>
           <Link to="/how-it-works" className="hover:text-[var(--accent-text)]">How it works</Link>

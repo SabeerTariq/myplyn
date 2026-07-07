@@ -53,11 +53,13 @@ export function PageHero({ eyebrow, title, lead }) {
   );
 }
 
-export function BrandLogo() {
+export function BrandLogo({ height = 44 }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-      <circle cx="8" cy="12" r="5" />
-      <circle cx="16" cy="12" r="5" />
-    </svg>
+    <img
+      src={BRAND.logoSrc}
+      alt={BRAND.logoAlt}
+      className="brand-logo-img"
+      style={{ height, width: 'auto' }}
+    />
   );
 }

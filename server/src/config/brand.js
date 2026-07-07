@@ -1,5 +1,5 @@
 export const BRAND = {
-  name: 'My Plyn',
+  name: 'MYPLYN',
   slug: 'myplyn',
   domain: 'myplyn.com',
   supportEmail: 'support@myplyn.com',

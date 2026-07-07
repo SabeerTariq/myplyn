@@ -9,7 +9,6 @@ import { walletApi } from '../services/api';
 import Icon from '../components/Icon';
 import NotificationsPanel from '../components/NotificationsPanel';
 import BrandMark from '../components/BrandMark';
-import { BRAND } from '../config/brand';
 
 function NavItem({ item, collapsed, badgeCounts, expanded }) {
   const badge = item.badgeKey ? badgeCounts?.[item.badgeKey] : 0;
@@ -120,13 +119,10 @@ export default function DashboardShell({
         }}
       >
         {/* Logo */}
-        <div className="flex items-center gap-[11px] flex-none" style={{ height: 64, padding: '0 18px' }}>
-          <BrandMark size={30} />
-          {expanded && (
-            <div className="font-extrabold whitespace-nowrap" style={{ fontSize: '15.5px', letterSpacing: '-0.02em' }}>
-              {BRAND.name}
-            </div>
-          )}
+        <div className="flex items-center flex-none" style={{ height: 64, padding: '0 14px' }}>
+          <Link to={role === 'ADMIN' ? '/admin' : `/${role.toLowerCase()}`}>
+            <BrandMark size={expanded ? 40 : 34} />
+          </Link>
         </div>
 
         {/* Primary action */}

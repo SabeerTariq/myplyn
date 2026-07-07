@@ -8,8 +8,7 @@ export default function PublicLayout() {
       <header style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
         <div className="max-w-6xl mx-auto flex items-center justify-between" style={{ padding: '16px 30px' }}>
           <Link to="/" className="flex items-center gap-[11px]">
-            <BrandMark />
-            <span className="font-extrabold" style={{ fontSize: '15.5px', letterSpacing: '-0.02em' }}>{BRAND.name}</span>
+            <BrandMark size={40} />
           </Link>
           <nav className="hidden md:flex items-center gap-6" style={{ fontSize: 14, color: 'var(--text-2)' }}>
             <Link to="/how-it-works" className="hover:text-[var(--accent-text)]">How It Works</Link>

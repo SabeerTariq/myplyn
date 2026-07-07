@@ -39,6 +39,7 @@ function initMotion() {
   ScrollTrigger.getAll().forEach((t) => t.kill());
   gsap.killTweensOf('.landing-site [data-hero]');
   gsap.killTweensOf('.landing-site .float');
+  gsap.killTweensOf('.landing-site .hero-float, .landing-site .hero-social');
   gsap.set('.landing-site [data-hero]', { opacity: 1, y: 0, clearProps: 'opacity,transform' });
 
   let lenis;
@@ -46,6 +47,7 @@ function initMotion() {
 
   if (!reduce) {
     lenis = new Lenis({ duration: 1.1, easing: (t) => Math.min(1, 1.001 - 2 ** (-10 * t)), smoothWheel: true });
+    window.__landingLenis = lenis;
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
@@ -78,7 +80,10 @@ function initMotion() {
 
   if (reduce) {
     runCounters(false);
-    return () => { lenis?.destroy(); };
+    return () => {
+      lenis?.destroy();
+      delete window.__landingLenis;
+    };
   }
 
   const heroEls = gsap.utils.toArray('.landing-site [data-hero]');
@@ -94,14 +99,14 @@ function initMotion() {
     });
   }
 
-  gsap.utils.toArray('.landing-site .float').forEach((el, i) => {
-    gsap.to(el, { yPercent: i % 2 ? 8 : -8, duration: 3 + i, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+  gsap.utils.toArray('.landing-site .hero-float, .landing-site .hero-social').forEach((el, i) => {
+    gsap.to(el, { yPercent: i % 2 ? 6 : -6, duration: 3 + i * 0.3, ease: 'sine.inOut', yoyo: true, repeat: -1 });
   });
 
-  const mock = document.querySelector('.landing-site .mock-stage');
-  if (mock) {
-    gsap.to(mock, {
-      yPercent: -6,
+  const heroVisual = document.querySelector('.landing-site .hero-visual');
+  if (heroVisual) {
+    gsap.to(heroVisual, {
+      yPercent: -4,
       ease: 'none',
       scrollTrigger: { trigger: '.landing-site .hero', start: 'top top', end: 'bottom top', scrub: true },
     });
@@ -121,9 +126,10 @@ function initMotion() {
   return () => {
     heroTween?.kill();
     gsap.killTweensOf('.landing-site [data-hero]');
-    gsap.killTweensOf('.landing-site .float');
+    gsap.killTweensOf('.landing-site .hero-float, .landing-site .hero-social');
     gsap.set('.landing-site [data-hero]', { opacity: 1, y: 0, clearProps: 'opacity,transform' });
     lenis?.destroy();
+    delete window.__landingLenis;
     ScrollTrigger.getAll().forEach((t) => t.kill());
   };
 }
