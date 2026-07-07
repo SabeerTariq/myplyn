@@ -119,6 +119,27 @@ NODE_ENV=production
 PORT=4000
 CLIENT_URL=https://myplyn.com
 DATABASE_URL=mysql://user:pass@localhost:3306/myplyn
+
+# Hostinger mail — create info@myplyn.com in hPanel -> Emails
+SMTP_HOST=smtp.hostinger.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=info@myplyn.com
+SMTP_PASS=your-hostinger-mailbox-password
+EMAIL_FROM="Myplyn <info@myplyn.com>"
+LEAD_EMAIL=info@myplyn.com
+```
+
+If port `465` is blocked on the VPS, use `SMTP_PORT=587` and remove `SMTP_SECURE` (or set it to `false`).
+
+After restart, pm2 logs should show: `[mail] Hostinger SMTP ready (info@myplyn.com -> info@myplyn.com)`.
+
+Test the landing form endpoint:
+
+```bash
+curl -s -X POST http://127.0.0.1:4000/api/v1/leads \
+  -H "Content-Type: application/json" \
+  -d '{"fullName":"Test User","phone":"1234567890","source":"landing-en"}'
 ```
 
 The server serves `client/dist` when `NODE_ENV=production`. If you use **nginx** as a reverse proxy, point the site root to the Node app (port 4000), not an old static folder.

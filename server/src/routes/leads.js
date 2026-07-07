@@ -13,8 +13,8 @@ router.post('/', asyncHandler(async (req, res) => {
   }).parse(req.body);
 
   const subject = data.source === 'landing-en'
-    ? 'Myplyn Landing (EN) — New registration'
-    : 'Myplyn Landing — تسجيل جديد';
+    ? 'Myplyn — New Lead (English Landing)'
+    : 'Myplyn — New Lead (Arabic Landing)';
 
   await sendLeadEmail({
     fullName: data.fullName,

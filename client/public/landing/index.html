@@ -444,38 +444,15 @@ button{font-family:inherit;cursor:pointer;border:0}
 <script>
 /* ===== CONFIG — set these ===== */
 const WHATSAPP = '972525991923';
-const LEAD_EMAIL = 'info@myplyn.com';
-const IS_LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 
-async function sendLead({ fullName, phone, source, subject }) {
-  if (IS_LOCAL) {
-    const res = await fetch('/api/v1/leads', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ fullName, phone, source }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'Submission failed');
-    return;
-  }
-
-  const res = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(LEAD_EMAIL), {
+async function sendLead({ fullName, phone, source }) {
+  const res = await fetch('/api/v1/leads', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({
-      _subject: subject,
-      _template: 'table',
-      _captcha: false,
-      fullName,
-      phone,
-      source,
-      page: location.href,
-    }),
+    body: JSON.stringify({ fullName, phone, source }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok || data.success === 'false' || data.success === false) {
-    throw new Error(data.message || 'Submission failed');
-  }
+  if (!res.ok) throw new Error(data.error || 'Submission failed');
 }
 
 /* ===== header shadow on scroll ===== */
@@ -528,7 +505,6 @@ form.addEventListener('submit', async (e) => {
       fullName: name,
       phone,
       source: 'landing',
-      subject: 'Myplyn Landing — تسجيل جديد',
     });
   }catch(err){
     console.warn('lead send failed', err);

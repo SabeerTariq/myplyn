@@ -82,4 +82,9 @@ app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`${BRAND.name} API running on http://localhost:${PORT}`);
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    console.log(`[mail] Hostinger SMTP ready (${process.env.SMTP_USER} -> ${process.env.LEAD_EMAIL || 'info@myplyn.com'})`);
+  } else {
+    console.warn('[mail] SMTP not configured — landing form emails will not send');
+  }
 });

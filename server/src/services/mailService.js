@@ -16,24 +16,122 @@ function getTransporter() {
   const { SMTP_HOST, SMTP_USER, SMTP_PASS } = process.env;
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) return null;
 
+  const port = Number(process.env.SMTP_PORT) || 465;
+  const secure = process.env.SMTP_SECURE === 'true' || port === 465;
+
   transporter = nodemailer.createTransport({
     host: SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 587,
-    secure: Number(process.env.SMTP_PORT) === 465,
+    port,
+    secure,
     auth: { user: SMTP_USER, pass: SMTP_PASS },
+    ...(port === 587 && { requireTLS: true }),
   });
 
   return transporter;
 }
 
+function formatLeadSource(source) {
+  if (source === 'landing-en') return 'English Landing Page';
+  if (source === 'landing') return 'Arabic Landing Page';
+  return source;
+}
+
+function formatLeadDate(date = new Date()) {
+  return date.toLocaleString('en-GB', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'UTC',
+  }) + ' UTC';
+}
+
+function buildLeadEmailHtml({ fullName, phone, source, sentAt }) {
+  const safeName = escapeHtml(fullName);
+  const safePhone = escapeHtml(phone);
+  const safeSource = escapeHtml(formatLeadSource(source));
+  const safeDate = escapeHtml(formatLeadDate(new Date(sentAt)));
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Lead</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f7fb;font-family:Arial,Helvetica,sans-serif;color:#37485f;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f7fb;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border-radius:20px;overflow:hidden;border:1px solid #e6edea;box-shadow:0 14px 40px rgba(14,42,94,0.10);">
+          <tr>
+            <td style="background:linear-gradient(120deg,#0e2a5e 0%,#14357c 42%,#1ea24c 100%);padding:28px 32px;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#8cf0ac;margin-bottom:10px;">Myplyn</div>
+              <h1 style="margin:0;font-size:28px;line-height:1.2;font-weight:800;color:#ffffff;">New Lead</h1>
+              <p style="margin:10px 0 0;font-size:15px;line-height:1.6;color:#dbe7ff;">A new creator lead just came in from your landing page.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px 32px 8px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:separate;border-spacing:0 12px;">
+                <tr>
+                  <td style="padding:16px 18px;background:#f8fbf9;border:1px solid #e6edea;border-radius:14px;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#1ea24c;margin-bottom:6px;">Full Name</div>
+                    <div style="font-size:18px;font-weight:700;color:#0e2a5e;">${safeName}</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:16px 18px;background:#f8fbf9;border:1px solid #e6edea;border-radius:14px;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#1ea24c;margin-bottom:6px;">Phone</div>
+                    <div style="font-size:18px;font-weight:700;color:#0e2a5e;direction:ltr;text-align:left;">${safePhone}</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:16px 18px;background:#f8fbf9;border:1px solid #e6edea;border-radius:14px;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#1ea24c;margin-bottom:6px;">Source</div>
+                    <div style="font-size:16px;font-weight:700;color:#0e2a5e;">${safeSource}</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:16px 18px;background:#f8fbf9;border:1px solid #e6edea;border-radius:14px;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#1ea24c;margin-bottom:6px;">Received</div>
+                    <div style="font-size:16px;font-weight:600;color:#37485f;">${safeDate}</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 32px 28px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="padding:18px 20px;background:#eef3fb;border-radius:14px;border:1px solid #dbe4f2;">
+                    <p style="margin:0;font-size:14px;line-height:1.7;color:#14357c;">
+                      Follow up with this lead as soon as possible to complete onboarding and connect their pages.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 32px 28px;text-align:center;">
+              <p style="margin:0;font-size:12px;line-height:1.6;color:#71809a;">This message was sent automatically from the Myplyn landing form.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
 export async function sendLeadEmail({ fullName, phone, source, subject }) {
   const transport = getTransporter();
   const to = process.env.LEAD_EMAIL || 'info@myplyn.com';
-  const from = process.env.EMAIL_FROM || 'Myplyn <noreply@myplyn.com>';
-  const safeName = escapeHtml(fullName);
-  const safePhone = escapeHtml(phone);
-  const safeSource = escapeHtml(source);
+  const from = process.env.EMAIL_FROM || `Myplyn <${process.env.SMTP_USER || 'info@myplyn.com'}>`;
   const sentAt = new Date().toISOString();
+  const sourceLabel = formatLeadSource(source);
+  const dateLabel = formatLeadDate(new Date(sentAt));
 
   if (!transport) {
     console.warn('[mail] SMTP not configured. Lead:', { fullName, phone, source });
@@ -45,16 +143,17 @@ export async function sendLeadEmail({ fullName, phone, source, subject }) {
   await transport.sendMail({
     from,
     to,
-    subject: subject || 'Myplyn Landing — New registration',
-    html: `
-      <h2>New landing page registration</h2>
-      <table cellpadding="6" cellspacing="0" border="1" style="border-collapse:collapse">
-        <tr><td><strong>Name</strong></td><td>${safeName}</td></tr>
-        <tr><td><strong>Phone</strong></td><td>${safePhone}</td></tr>
-        <tr><td><strong>Source</strong></td><td>${safeSource}</td></tr>
-        <tr><td><strong>Submitted</strong></td><td>${sentAt}</td></tr>
-      </table>
-    `,
-    text: `Name: ${fullName}\nPhone: ${phone}\nSource: ${source}\nSubmitted: ${sentAt}`,
+    subject: subject || 'Myplyn — New Lead',
+    html: buildLeadEmailHtml({ fullName, phone, source, sentAt }),
+    text: [
+      'New Lead',
+      '',
+      `Full Name: ${fullName}`,
+      `Phone: ${phone}`,
+      `Source: ${sourceLabel}`,
+      `Received: ${dateLabel}`,
+      '',
+      'Follow up with this lead as soon as possible to complete onboarding and connect their pages.',
+    ].join('\n'),
   });
 }
