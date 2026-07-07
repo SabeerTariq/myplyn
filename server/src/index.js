@@ -50,17 +50,25 @@ app.use('/api/v1/stripe', stripeRoutes);
 // Serve the React build in production
 if (process.env.NODE_ENV === 'production') {
   const clientDist = path.join(__dirname, '../../client/dist');
-  const standaloneLanding = path.join(clientDist, 'landing/index.html');
+  const standaloneLandings = {
+    '/landing': path.join(clientDist, 'landing/index.html'),
+    '/landing-en': path.join(clientDist, 'landing-en/index.html'),
+  };
 
-  app.get('/landing', (req, res) => {
-    res.sendFile(standaloneLanding);
+  Object.entries(standaloneLandings).forEach(([route, file]) => {
+    app.get(route, (req, res) => res.sendFile(file));
   });
 
   app.use(express.static(clientDist));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) return next();
+    const landingFile = standaloneLandings[req.path.replace(/\/$/, '')];
+    if (landingFile) return res.sendFile(landingFile);
     if (req.path === '/landing' || req.path.startsWith('/landing/')) {
-      return res.sendFile(standaloneLanding);
+      return res.sendFile(standaloneLandings['/landing']);
+    }
+    if (req.path === '/landing-en' || req.path.startsWith('/landing-en/')) {
+      return res.sendFile(standaloneLandings['/landing-en']);
     }
     res.sendFile(path.join(clientDist, 'index.html'));
   });

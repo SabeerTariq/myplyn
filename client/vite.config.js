@@ -5,7 +5,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const standaloneLanding = path.join(__dirname, 'public/landing/index.html');
+const standaloneLandings = {
+  '/landing': path.join(__dirname, 'public/landing/index.html'),
+  '/landing-en': path.join(__dirname, 'public/landing-en/index.html'),
+};
 
 function standaloneLandingPlugin() {
   return {
@@ -13,9 +16,10 @@ function standaloneLandingPlugin() {
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const url = req.url?.split('?')[0];
-        if (url === '/landing' || url === '/landing/') {
+        const file = standaloneLandings[url] || standaloneLandings[url?.replace(/\/$/, '')];
+        if (file) {
           res.setHeader('Content-Type', 'text/html; charset=utf-8');
-          fs.createReadStream(standaloneLanding).pipe(res);
+          fs.createReadStream(file).pipe(res);
           return;
         }
         next();

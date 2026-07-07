@@ -304,7 +304,7 @@ export default function LandingHome() {
                   <path d="M20 6 9 17l-5-5" />
                 </svg>
               </div>
-            </div>
+                </div>
 
             <div className="hero-float hero-float--earn">
               <div className="hf-icon-wrap hf-icon-wrap--chart" aria-hidden="true">
@@ -313,8 +313,8 @@ export default function LandingHome() {
                   <path d="M7 16V9" />
                   <path d="M12 16V5" />
                   <path d="M17 16v-6" />
-                </svg>
-              </div>
+                  </svg>
+                </div>
               <div className="hf-earn-wrap">
               <div className="hf-sub">Earnings</div>
               <div className="hf-amt">$4,250</div>
@@ -324,10 +324,10 @@ export default function LandingHome() {
                   <path d="m5 12 7-7 7 7" />
                 </svg>
                 32% this month
-              </div>
+                </div>
               </div>
             </div>
-
+            
             <div className="hero-pedestal" aria-hidden="true" />
             <div className="hero-phone">
               <div className="hp-notch" aria-hidden="true" />
@@ -419,8 +419,8 @@ export default function LandingHome() {
                     <span className="hp-badge">Connected</span>
                     <svg className="hp-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
                   </div>
-                </div>
-
+            </div>
+            
                 <div className="hp-nav">
                   <div className="hp-nav-item on">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
@@ -521,7 +521,7 @@ export default function LandingHome() {
               </div>
               <div className="stat-card-num accent">
                 <span data-count="4.9" data-dec="1"></span>/5
-              </div>
+        </div>
               <div className="stat-card-lbl">Average creator experience</div>
               <span className="stat-card-dots" aria-hidden="true" />
             </article>
@@ -745,7 +745,7 @@ export default function LandingHome() {
                 <span className="cv-brands-heart" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-6.2-4.35-8.5-7.8C1.7 10.2 3.2 6.5 6.6 6c1.7-.3 3.3.4 4.4 1.7C12.1 6.4 13.7 5.7 15.4 6c3.4.5 4.9 4.2 3.1 7.2C18.2 16.65 12 21 12 21z" /></svg>
                 </span>
-              </div>
+          </div>
             </div>
           </div>
 
@@ -918,8 +918,8 @@ export default function LandingHome() {
 
 
       <section className="section marketplace-section">
-        <div className="container">
-          <div className="section-head center reveal">
+          <div className="container">
+            <div className="section-head center reveal">
             <p className="eyebrow">DISCOVER CREATORS ✦</p>
             <h2 className="h2">Find creators that fit your brand</h2>
             <p className="lead">Browse real pages, niches, and engagement at a glance.</p>
@@ -957,10 +957,10 @@ export default function LandingHome() {
                     <div>
                       <div className="tr-name">{item.name}</div>
                       <div className="tr-role">{item.role}</div>
-                    </div>
-                  </div>
+            </div>
+            </div>
                   <span className="tr-mark" aria-hidden="true">”</span>
-                </div>
+            </div>
               </article>
             ))}
           </div>
@@ -1045,7 +1045,7 @@ export default function LandingHome() {
                 <span><strong>$75</strong> fee</span>
                 <span className="pr-breakdown-arrow" aria-hidden="true">→</span>
                 <span className="pr-breakdown-hi"><strong>$425</strong> creator earnings</span>
-              </div>
+            </div>
 
               <ul className="pr-features pr-features--navy">
                 <li>
@@ -1126,7 +1126,7 @@ export default function LandingHome() {
               <p className="eyebrow">READY TO JOIN?</p>
               <h2>Turn your page into income.</h2>
               <p>Join Myplyn and start getting discovered by businesses looking for creators like you.</p>
-              <div className="hero-cta">
+            <div className="hero-cta">
                 <Link to="/auth/signup/creator" className="btn btn-green btn-lg">Join as a Creator</Link>
                 <Link to="/auth/signup/advertiser" className="btn btn-white btn-lg">Start as a Business</Link>
               </div>
