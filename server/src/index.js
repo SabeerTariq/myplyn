@@ -17,6 +17,7 @@ import messageRoutes from './routes/messages.js';
 import taxonomyRoutes from './routes/taxonomy.js';
 import adminRoutes from './routes/admin.js';
 import stripeRoutes from './routes/stripe.js';
+import leadRoutes from './routes/leads.js';
 import { BRAND } from './config/brand.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -46,6 +47,7 @@ app.use('/api/v1/messages', messageRoutes);
 app.use('/api/v1/taxonomy', taxonomyRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/stripe', stripeRoutes);
+app.use('/api/v1/leads', leadRoutes);
 
 // Serve the React build in production
 if (process.env.NODE_ENV === 'production') {

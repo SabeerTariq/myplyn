@@ -394,7 +394,38 @@ button{font-family:inherit;cursor:pointer;border:0}
 <script>
 const WHATSAPP = '972525991923';
 const LEAD_EMAIL = 'info@myplyn.com';
-const LEAD_ENDPOINT = 'https://formsubmit.co/ajax/' + encodeURIComponent(LEAD_EMAIL);
+const IS_LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+
+async function sendLead({ fullName, phone, source, subject }) {
+  if (IS_LOCAL) {
+    const res = await fetch('/api/v1/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ fullName, phone, source }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Submission failed');
+    return;
+  }
+
+  const res = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(LEAD_EMAIL), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      _subject: subject,
+      _template: 'table',
+      _captcha: false,
+      fullName,
+      phone,
+      source,
+      page: location.href,
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.success === 'false' || data.success === false) {
+    throw new Error(data.message || 'Submission failed');
+  }
+}
 
 const header = document.querySelector('.header');
 addEventListener('scroll', () => header.classList.toggle('scrolled', scrollY > 8), {passive:true});
@@ -423,6 +454,8 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = nameEl.value.trim();
   const phone = phoneEl.value.replace(/[^\d+]/g,'');
+  const note = form.querySelector('.form-note');
+  const submitBtn = form.querySelector('button[type="submit"]');
   if(name.length < 2){ return invalid(nameEl); }
   if(phone.length < 7){ return invalid(phoneEl); }
 
@@ -430,20 +463,24 @@ form.addEventListener('submit', async (e) => {
   if(typeof gtag === 'function') gtag('event','generate_lead',{method:'landing_form_en'});
   window.dataLayer = window.dataLayer || []; window.dataLayer.push({event:'lead_submit',locale:'en'});
 
+  note.style.color = '';
+  note.textContent = 'By signing up, you agree that the Myplyn team may contact you.';
+  submitBtn.disabled = true;
+
   try{
-    await fetch(LEAD_ENDPOINT,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Accept':'application/json'},
-      body:JSON.stringify({
-        _subject:'Myplyn Landing (EN) — New registration',
-        _template:'table',
-        fullName:name,
-        phone:phone,
-        source:'landing-en',
-        ts:new Date().toISOString(),
-      }),
+    await sendLead({
+      fullName: name,
+      phone,
+      source: 'landing-en',
+      subject: 'Myplyn Landing (EN) — New registration',
     });
-  }catch(err){ console.warn('lead send failed', err); }
+  }catch(err){
+    console.warn('lead send failed', err);
+    note.style.color = '#E24C4C';
+    note.textContent = 'Could not send the form. Contact us on WhatsApp or at info@myplyn.com';
+    submitBtn.disabled = false;
+    return;
+  }
 
   document.getElementById('waSuccess').href =
     'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent('Hello, my name is ' + name + ' and my number is ' + phone + '. I want to complete my Myplyn registration.');

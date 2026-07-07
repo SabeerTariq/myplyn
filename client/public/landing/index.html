@@ -445,7 +445,38 @@ button{font-family:inherit;cursor:pointer;border:0}
 /* ===== CONFIG — set these ===== */
 const WHATSAPP = '972525991923';
 const LEAD_EMAIL = 'info@myplyn.com';
-const LEAD_ENDPOINT = 'https://formsubmit.co/ajax/' + encodeURIComponent(LEAD_EMAIL);
+const IS_LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+
+async function sendLead({ fullName, phone, source, subject }) {
+  if (IS_LOCAL) {
+    const res = await fetch('/api/v1/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ fullName, phone, source }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Submission failed');
+    return;
+  }
+
+  const res = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(LEAD_EMAIL), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      _subject: subject,
+      _template: 'table',
+      _captcha: false,
+      fullName,
+      phone,
+      source,
+      page: location.href,
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.success === 'false' || data.success === false) {
+    throw new Error(data.message || 'Submission failed');
+  }
+}
 
 /* ===== header shadow on scroll ===== */
 const header = document.querySelector('.header');
@@ -479,31 +510,34 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = nameEl.value.trim();
   const phone = phoneEl.value.replace(/[^\d+]/g,'');
+  const note = form.querySelector('.form-note');
+  const submitBtn = form.querySelector('button[type="submit"]');
   if(name.length < 2){ return invalid(nameEl); }
   if(phone.length < 7){ return invalid(phoneEl); }
 
-  // ---- marketing tracking (fires if GA4 / Pixel are configured) ----
   if(typeof fbq === 'function') fbq('track','Lead',{content_name:'Creator Signup'});
   if(typeof gtag === 'function') gtag('event','generate_lead',{method:'landing_form'});
   window.dataLayer = window.dataLayer || []; window.dataLayer.push({event:'lead_submit'});
 
-  // ---- send lead to email via FormSubmit ----
-  try{
-    await fetch(LEAD_ENDPOINT,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Accept':'application/json'},
-      body:JSON.stringify({
-        _subject:'Myplyn Landing — تسجيل جديد',
-        _template:'table',
-        fullName:name,
-        phone:phone,
-        source:'landing',
-        ts:new Date().toISOString(),
-      }),
-    });
-  }catch(err){ console.warn('lead send failed', err); }
+  note.style.color = '';
+  note.textContent = 'بالتسجيل أنت توافق على أن يتواصل معك فريق ميبلين.';
+  submitBtn.disabled = true;
 
-  // ---- success state + prefilled WhatsApp ----
+  try{
+    await sendLead({
+      fullName: name,
+      phone,
+      source: 'landing',
+      subject: 'Myplyn Landing — تسجيل جديد',
+    });
+  }catch(err){
+    console.warn('lead send failed', err);
+    note.style.color = '#E24C4C';
+    note.textContent = 'تعذر إرسال النموذج. تواصل معنا عبر واتساب أو على info@myplyn.com';
+    submitBtn.disabled = false;
+    return;
+  }
+
   document.getElementById('waSuccess').href =
     'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent('مرحباً، اسمي ' + name + ' ورقمي ' + phone + '. أريد إكمال التسجيل في Myplyn.');
   form.style.display = 'none';
