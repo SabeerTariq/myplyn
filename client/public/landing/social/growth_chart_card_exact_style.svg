@@ -1,0 +1,47 @@
+<svg width="220" height="142" viewBox="0 0 220 142" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="220" height="142" fill="#FFFFFF"/>
+
+  <defs>
+    <filter id="cardShadow" x="78" y="5" width="88" height="83" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#000000" flood-opacity="0.055"/>
+    </filter>
+  </defs>
+
+  <!-- left dotted path -->
+  <path d="M-4 68
+           C 12 70, 25 82, 39 78
+           C 53 74, 55 56, 43 55
+           C 31 54, 29 75, 44 79
+           C 62 84, 76 66, 90 62"
+        stroke="#B9D8CD"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-dasharray="1.4 6.2"/>
+
+  <!-- tilted white card -->
+  <g filter="url(#cardShadow)" transform="rotate(4 122 43)">
+    <rect x="91" y="15" width="62" height="57" rx="10" fill="#FFFFFF"/>
+    <rect x="91.5" y="15.5" width="61" height="56" rx="9.5" stroke="#EEF0F0"/>
+  </g>
+
+  <!-- chart icon, placed inside same tilt as card -->
+  <g transform="rotate(4 122 43)">
+    <!-- first small rounded bar -->
+    <rect x="109" y="48" width="9" height="14" rx="2.2" fill="#10AA63"/>
+    <!-- second bar -->
+    <rect x="122" y="40" width="9" height="22" rx="2.2" fill="#10AA63"/>
+    <!-- third bar -->
+    <rect x="135" y="31" width="9" height="31" rx="2.2" fill="#10AA63"/>
+
+    <!-- rising arrow line -->
+    <path d="M113.8 42.8
+             C 121.5 41.5, 128.4 36.7, 137.3 27.4"
+          stroke="#10AA63"
+          stroke-width="3.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+    <!-- arrow head -->
+    <path d="M136.1 27.2 L146.4 27.2 L146.4 37.5 Z" fill="#10AA63"/>
+  </g>
+</svg>

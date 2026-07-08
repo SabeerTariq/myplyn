@@ -1,110 +1,226 @@
 import { Link } from 'react-router-dom';
-import { BRAND } from '../../config/brand';
+
+const businessSteps = [
+  {
+    title: 'Create your profile',
+    text: 'Set up your brand and link your social accounts.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Launch campaigns',
+    text: 'Create briefs, target creators and set your budget.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m3 11 18-5v12L3 14v-3z" />
+        <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Invite or accept creators',
+    text: 'Choose from offers or invite specific creators.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Send materials',
+    text: 'Share assets and messaging via chat.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="17 8 12 3 7 8" />
+        <line x1="12" y1="3" x2="12" y2="15" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Approve posts',
+    text: 'Review before they go live or request edits.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 11l3 3L22 4" />
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Release payment',
+    text: 'Funds released automatically on approval.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23" />
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+      </svg>
+    ),
+  },
+];
+
+const creatorSteps = [
+  {
+    title: 'Register with your email',
+    text: 'Sign up and link your social pages.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2" />
+        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Complete your profile',
+    text: 'Add details about your niche and audience.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Find or get campaign offers',
+    text: 'Browse campaigns or receive invitations.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Publish content',
+    text: 'Use brand materials to post on your pages.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Submit proof',
+    text: 'Upload your live link or screenshot.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="17 8 12 3 7 8" />
+        <line x1="12" y1="3" x2="12" y2="15" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Withdraw your earnings',
+    text: 'Paid directly after verification.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="5" width="20" height="14" rx="2" />
+        <path d="M2 10h20" />
+      </svg>
+    ),
+  },
+];
+
+function JourneyCard({ title, headerIcon, steps, className, revealClass }) {
+  return (
+    <article className={`hiw-ref-card ${className} reveal ${revealClass}`.trim()}>
+      <div className="hiw-ref-card-head">
+        <span className="hiw-ref-card-ico" aria-hidden="true">{headerIcon}</span>
+        <h2 className="h3">{title}</h2>
+      </div>
+      <ol className="hiw-ref-steps">
+        {steps.map((step, index) => (
+          <li key={step.title} className="hiw-ref-step">
+            <span className="hiw-ref-step-num">{index + 1}</span>
+            <span className="hiw-ref-step-icon" aria-hidden="true">{step.icon}</span>
+            <div className="hiw-ref-step-copy">
+              <strong>{step.title}</strong>
+              <p>{step.text}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </article>
+  );
+}
 
 export default function LandingHowItWorks() {
   return (
     <>
-      <section className="page-hero">
-        <div className="hero-bg"><span className="blob b1"></span><span className="blob b2"></span></div>
+      <section className="hiw-ref-hero">
         <div className="container">
           <p className="eyebrow reveal">HOW IT WORKS</p>
-          <h1 className="h1 reveal d1" style={{ marginTop: '14px' }}>One transparent flow,<br />from match to payout</h1>
-          <p className="lead reveal d2">Every collaboration moves through the same clear steps — and both sides can see the status at every stage. No guesswork, no chasing.</p>
+          <h1 className="h1 reveal d1">
+            One transparent flow,
+            <br />
+            from match to payout
+          </h1>
+          <p className="lead reveal d2">
+            A clear, step-by-step process designed to make your workflow seamless and transparent.
+          </p>
         </div>
       </section>
 
-
-      <section className="section" style={{ paddingTop: '20px' }}>
+      <section className="hiw-ref-journeys">
         <div className="container">
-          <div className="lanes">
-            <div className="lane brand-lane reveal">
-              <div className="lane-head"><span className="lane-tag">BRANDS</span></div>
-              <h3 className="h3">Your journey as an advertiser</h3>
-              <ol>
-                <li><div><b>Create &amp; fund a campaign</b><span>Add your brief, requirements, target audience and budget. Fund it upfront — the money is held securely until work is approved.</span></div></li>
-                <li><div><b>Discover or invite creators</b><span>Search the marketplace by niche, platform, location and price, or post an open brief and let creators apply.</span></div></li>
-                <li><div><b>Review &amp; approve</b><span>Compare applicants, check verified stats and reviews, then approve the creators you want with a click.</span></div></li>
-                <li><div><b>Share your assets</b><span>Send creative, talking points and links through built-in messaging so creators have everything they need.</span></div></li>
-                <li><div><b>Verify the proof</b><span>When the creator posts, you get the live link or screenshot. Approve it — or request changes — in seconds.</span></div></li>
-                <li><div><b>Payment released</b><span>On approval, the held funds release to the creator automatically. You keep a full record of every campaign.</span></div></li>
-              </ol>
-            </div>
-            <div className="lane creator-lane reveal d1">
-              <div className="lane-head"><span className="lane-tag">CREATORS</span></div>
-              <h3 className="h3">Your journey as a creator</h3>
-              <ol>
-                <li><div><b>List your pages</b><span>Add your platforms, niches, audience size and rates to one free profile. Get verified to stand out.</span></div></li>
-                <li><div><b>Get matched or apply</b><span>Receive invitations that fit your niche, or browse open campaigns and apply with a single tap.</span></div></li>
-                <li><div><b>Accept the deal</b><span>See the offer and your exact net earnings — after the 15% fee — before you commit. No surprises.</span></div></li>
-                <li><div><b>Create &amp; publish</b><span>Use the brand's assets to publish the promotion on your page, on your schedule.</span></div></li>
-                <li><div><b>Submit proof</b><span>Drop in the live link or a screenshot. The brand or our team verifies it quickly.</span></div></li>
-                <li><div><b>Get paid fast</b><span>Once verified, your payout is processed through Stripe — typically in your account within 48 hours.</span></div></li>
-              </ol>
-            </div>
+          <div className="hiw-ref-grid">
+            <JourneyCard
+              title="Your journey as a business"
+              className="hiw-ref-card--business"
+              revealClass=""
+              headerIcon={(
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="7" width="20" height="14" rx="2" />
+                  <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+                </svg>
+              )}
+              steps={businessSteps}
+            />
+            <JourneyCard
+              title="Your journey as a creator"
+              className="hiw-ref-card--creator"
+              revealClass="d1"
+              headerIcon={(
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              )}
+              steps={creatorSteps}
+            />
           </div>
         </div>
       </section>
 
-
-      <section className="section section-soft">
+      <section className="hiw-ref-cta">
         <div className="container">
-          <div className="section-head center reveal">
-            <p className="eyebrow">THE FULL WORKFLOW</p>
-            <h2 className="h2">Eleven steps, one shared status</h2>
-            <p className="lead">Behind the scenes, every collaboration follows the same lifecycle — visible to brand, creator and our team alike.</p>
-          </div>
-          <div className="flowstrip reveal">
-            <div className="fs"><span className="n">1</span>List pages</div>
-            <div className="fs"><span className="n">2</span>Create &amp; fund</div>
-            <div className="fs"><span className="n">3</span>Discover</div>
-            <div className="fs"><span className="n">4</span>Request / apply</div>
-            <div className="fs"><span className="n">5</span>Accept</div>
-            <div className="fs"><span className="n">6</span>Share assets</div>
-            <div className="fs"><span className="n">7</span>Publish</div>
-            <div className="fs"><span className="n">8</span>Submit proof</div>
-            <div className="fs"><span className="n">9</span>Verify</div>
-            <div className="fs"><span className="n">10</span>Release payment</div>
-            <div className="fs"><span className="n">11</span>15% commission</div>
-          </div>
-        </div>
-      </section>
-
-
-      <section className="section audience">
-        <div className="container">
-          <div className="a-copy reveal">
-            <p className="eyebrow">SECURE PAYMENTS</p>
-            <h2 className="h2">Money is held until the work is done</h2>
-            <p className="lead" style={{ marginTop: '18px' }}>When a brand funds a campaign, the budget is held safely by the platform — not paid out yet, not pocketed. It's released to the creator only after the promotion is published and verified.</p>
-            <ul className="a-list">
-              <li><span className="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><div><b>Brands are protected</b><span>You never pay for a post that doesn't go live. Funds only release on your approval.</span></div></li>
-              <li><span className="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><div><b>Creators are guaranteed</b><span>The money is already secured before you start, so you know the deal is real.</span></div></li>
-              <li><span className="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><div><b>Powered by Stripe</b><span>Card payments and creator payouts run on Stripe Connect — secure, compliant and fast.</span></div></li>
-            </ul>
-          </div>
-          <div className="a-visual reveal d2">
-            <div className="mock">
-              <div className="mock-top"><span className="dot r"></span><span className="dot y"></span><span className="dot g"></span><span className="tt">Collaboration · status</span></div>
-              <div className="mock-body">
-                <div className="tbl">
-                  <div className="tr"><span className="pill ok" style={{ marginLeft: '0' }}>✓</span><div><div className="nm">Campaign funded</div><div className="sub">$1,500 held securely</div></div><span className="pill ok">Done</span></div>
-                  <div className="tr"><span className="pill ok" style={{ marginLeft: '0' }}>✓</span><div><div className="nm">Creator accepted</div><div className="sub">@maya.styles · net $1,275</div></div><span className="pill ok">Done</span></div>
-                  <div className="tr"><span className="pill ok" style={{ marginLeft: '0' }}>✓</span><div><div className="nm">Post published</div><div className="sub">Proof submitted</div></div><span className="pill ok">Done</span></div>
-                  <div className="tr" style={{ borderColor: 'var(--indigo-200)', background: 'var(--indigo-50)' }}><span className="pill live" style={{ marginLeft: '0' }}>●</span><div><div className="nm">Awaiting verification</div><div className="sub">Approve to release payment</div></div><span className="pill pend">Now</span></div>
-                  <div className="tr" style={{ opacity: '.55' }}><span className="pill" style={{ marginLeft: '0', background: 'var(--slate-100)', color: 'var(--slate-400)' }}>$</span><div><div className="nm">Payout released</div><div className="sub">Stripe · within 48h</div></div><span className="pill" style={{ background: 'var(--slate-100)', color: 'var(--slate-400)' }}>Next</span></div>
-                </div>
-              </div>
+          <div className="hiw-ref-cta-band reveal">
+            <span className="hiw-ref-cta-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
+            </span>
+            <div className="hiw-ref-cta-copy">
+              <h3>Simple workflow. Clear steps. Secure payouts.</h3>
+              <p>Built for trust. Designed for speed.</p>
             </div>
+            <Link to="/auth/signup/creator" className="btn btn-green hiw-ref-cta-btn">
+              Join as a Creator →
+            </Link>
           </div>
         </div>
-      </section>
-
-      <section className="section" style={{ paddingTop: '0' }}>
-        <div className="container"><div className="cta-band reveal">
-          <h2>Start your first collaboration today</h2>
-          <p>It takes minutes to post a campaign or list your pages. Pay — or get paid — only when the work is done.</p>
-          <div className="hero-cta"><Link to="/auth/signup/advertiser" className="btn btn-white btn-lg">Start as a brand</Link><Link to="/auth/signup/creator" className="btn btn-accent btn-lg">Join as a creator</Link></div>
-        </div></div>
       </section>
     </>
   );

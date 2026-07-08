@@ -1,0 +1,53 @@
+<svg width="220" height="150" viewBox="0 0 220 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- dotted flight path -->
+  <path d="M18 96
+           C40 75 64 82 58 104
+           C52 128 27 116 41 94
+           C57 68 91 69 109 91
+           C122 106 135 101 145 83"
+        stroke="#C8D4D4"
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-dasharray="2 8"/>
+
+  <!-- paper plane outer shape -->
+  <path d="M98 38 L187 20 L136 93 L120 66 L98 38Z"
+        fill="none"
+        stroke="#7F96C9"
+        stroke-width="4"
+        stroke-linejoin="round"
+        stroke-linecap="round"/>
+
+  <!-- main inner fold -->
+  <path d="M98 38 L137 59 L187 20"
+        fill="none"
+        stroke="#7F96C9"
+        stroke-width="3.5"
+        stroke-linejoin="round"
+        stroke-linecap="round"/>
+
+  <!-- lower fold -->
+  <path d="M137 59 L120 66 L136 93"
+        fill="none"
+        stroke="#7F96C9"
+        stroke-width="3.5"
+        stroke-linejoin="round"
+        stroke-linecap="round"/>
+
+  <!-- small inside fold / tail detail -->
+  <path d="M120 66 L113 82 L128 73"
+        fill="none"
+        stroke="#7F96C9"
+        stroke-width="3"
+        stroke-linejoin="round"
+        stroke-linecap="round"/>
+
+  <!-- faint duplicate highlight for soft screenshot feel -->
+  <path d="M103 42 L180 25 L137 86"
+        fill="none"
+        stroke="#AFC0E2"
+        stroke-width="1.6"
+        stroke-linejoin="round"
+        stroke-linecap="round"
+        opacity="0.55"/>
+</svg>

@@ -1,0 +1,49 @@
+<svg width="220" height="150" viewBox="0 0 220 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- dotted flight path -->
+  <path d="M35 112
+           C58 113 74 96 63 82
+           C52 68 74 52 94 65
+           C113 78 103 98 126 96
+           C149 94 159 74 151 55
+           C148 48 145 43 142 39"
+        stroke="#C8D4D4"
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-dasharray="2 8"/>
+
+  <!-- star outline -->
+  <path d="M159.5 29
+           L164.8 40.2
+           L177 41.8
+           L168.1 50.2
+           L170.4 62.3
+           L159.5 56.4
+           L148.6 62.3
+           L150.9 50.2
+           L142 41.8
+           L154.2 40.2
+           L159.5 29Z"
+        fill="none"
+        stroke="#8B9CB0"
+        stroke-width="4"
+        stroke-linejoin="round"
+        stroke-linecap="round"/>
+
+  <!-- soft inner highlight -->
+  <path d="M159.5 36.5
+           L162.4 42.7
+           L169.1 43.6
+           L164.2 48.2
+           L165.5 54.8
+           L159.5 51.6
+           L153.5 54.8
+           L154.8 48.2
+           L149.9 43.6
+           L156.6 42.7
+           L159.5 36.5Z"
+        fill="none"
+        stroke="#B8C4CF"
+        stroke-width="1.7"
+        stroke-linejoin="round"
+        opacity="0.65"/>
+</svg>

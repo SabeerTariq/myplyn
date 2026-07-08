@@ -1,0 +1,19 @@
+<svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- soft target circles -->
+  <circle cx="105" cy="112" r="72" fill="#DFF4EB"/>
+  <circle cx="105" cy="112" r="49" fill="white"/>
+  <circle cx="105" cy="112" r="31" fill="#BFE8D9"/>
+  <circle cx="105" cy="112" r="13" fill="white"/>
+  <circle cx="105" cy="112" r="6" fill="#4AA889"/>
+
+  <!-- arrow shaft -->
+  <line x1="106" y1="111" x2="164" y2="54" stroke="#2B3A42" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- arrow head -->
+  <path d="M164 54 L188 43 L177 66 Z" fill="#0F9D58"/>
+  <path d="M164 54 L177 66 L153 75 Z" fill="#087B46"/>
+
+  <!-- arrow tail / feather -->
+  <path d="M164 54 L162 24 L183 42 Z" fill="#11A76B"/>
+  <path d="M164 54 L192 55 L177 66 Z" fill="#0C8B56"/>
+</svg>

@@ -1,0 +1,38 @@
+<svg width="220" height="170" viewBox="0 0 220 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- pale mint background blob -->
+  <path d="M105.6 26.8C121.9 9.6 151.4 13.4 162.5 35.7C174.6 60.2 158.4 96.4 128.6 112.8C98.9 129.2 63.9 121.9 55.7 98.1C48.8 78.1 61.8 61.8 78.8 49.1C89.2 41.3 97.2 35.7 105.6 26.8Z" fill="#E8F7F0"/>
+
+  <!-- dotted trail, closer to reference -->
+  <path d="M7 122C24 127 40 126 48 111C56 95 69 94 75 103C84 117 62 126 72 138C82 151 116 132 132 108"
+        stroke="#C9DCD2" stroke-width="2.7" stroke-linecap="round" stroke-dasharray="2.2 7.5"/>
+
+  <!-- exhaust / flame -->
+  <path d="M88.8 101.4C80.2 104.1 75.2 112.4 72.2 121.2C80.3 119.1 87.7 114.4 92.3 106.7L88.8 101.4Z" fill="#8CD9BD"/>
+
+  <!-- left wing -->
+  <path d="M96.4 88.3L74.2 86.1L86.8 101.5L97.8 96.9L96.4 88.3Z" fill="#8AD8BC"/>
+
+  <!-- main rocket body -->
+  <path d="M90.1 101.8C98.3 72.8 124.3 46.1 154.3 38.9C150.2 69.3 124.4 95.8 96.1 105.9L90.1 101.8Z" fill="#82D4B7"/>
+
+  <!-- nose darker curve -->
+  <path d="M136.5 44.6C142 41.9 148 40 154.3 38.9C153.5 45.4 151.8 51.6 149.2 57.5L136.5 44.6Z" fill="#6DCDAA"/>
+
+  <!-- right wing -->
+  <path d="M99.2 104.7L103.8 126.7L117.5 105.4L108.3 100.9L99.2 104.7Z" fill="#8AD8BC"/>
+
+  <!-- rocket bottom shadow piece -->
+  <path d="M90.1 101.8L96.1 105.9C101.3 104.1 106.5 101.8 111.5 99.1L97.2 85.2C94.1 90.5 91.7 96 90.1 101.8Z" fill="#73CDAE"/>
+
+  <!-- highlight on rocket -->
+  <path d="M105.7 83.5C114.2 69.5 127.1 56.8 141.3 49.1" stroke="#BFEFDB" stroke-width="3" stroke-linecap="round" opacity="0.65"/>
+
+  <!-- window -->
+  <circle cx="127.6" cy="64.7" r="7.4" fill="#EFFFF8"/>
+  <circle cx="127.6" cy="64.7" r="4.1" fill="#85D7BB"/>
+
+  <!-- tiny blur cover for softer original-like look -->
+  <g opacity="0.25">
+    <path d="M100 73C111 59 127 48 144 42" stroke="#F8FFFC" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+</svg>
