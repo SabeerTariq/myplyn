@@ -125,6 +125,57 @@ function buildLeadEmailHtml({ fullName, phone, source, sentAt }) {
 </html>`;
 }
 
+export async function sendChatEmail({ userMessage, botReply, page, visitorEmail, source = 'chat-widget' }) {
+  const transport = getTransporter();
+  const to = process.env.CHAT_EMAIL || process.env.LEAD_EMAIL || 'info@myplyn.com';
+  const from = process.env.EMAIL_FROM || `Myplyn <${process.env.SMTP_USER || 'info@myplyn.com'}>`;
+  const sentAt = formatLeadDate(new Date());
+
+  const safeMessage = escapeHtml(userMessage);
+  const safeReply = escapeHtml(botReply || '—');
+  const safePage = escapeHtml(page || '/');
+  const safeEmail = escapeHtml(visitorEmail || 'Not provided');
+  const safeSource = escapeHtml(source);
+
+  if (!transport) {
+    console.warn('[mail] SMTP not configured. Chat message:', { userMessage, page });
+    return false;
+  }
+
+  await transport.sendMail({
+    from,
+    to,
+    subject: 'MYPLYN Chat — new visitor message',
+    html: `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;color:#0A1F44;padding:24px;">
+      <h2 style="color:#00B86B;margin:0 0 16px;">MYPLYN Chat Widget</h2>
+      <p><strong>Page:</strong> ${safePage}</p>
+      <p><strong>Visitor email:</strong> ${safeEmail}</p>
+      <p><strong>Source:</strong> ${safeSource}</p>
+      <p><strong>Time:</strong> ${escapeHtml(sentAt)}</p>
+      <hr style="border:none;border-top:1px solid #E8EDF3;margin:20px 0"/>
+      <p><strong>Visitor message</strong></p>
+      <p style="background:#F8FAFC;padding:12px;border-radius:8px;">${safeMessage}</p>
+      <p><strong>Bot reply (Plyn)</strong></p>
+      <p style="background:#F0FDF4;padding:12px;border-radius:8px;">${safeReply}</p>
+    </body></html>`,
+    text: [
+      'MYPLYN Chat Widget',
+      '',
+      `Page: ${page || '/'}`,
+      `Visitor email: ${visitorEmail || 'Not provided'}`,
+      `Time: ${sentAt}`,
+      '',
+      'Visitor message:',
+      userMessage,
+      '',
+      'Bot reply:',
+      botReply || '—',
+    ].join('\n'),
+  });
+
+  return true;
+}
+
 export async function sendLeadEmail({ fullName, phone, source, subject }) {
   const transport = getTransporter();
   const to = process.env.LEAD_EMAIL || 'info@myplyn.com';

@@ -18,6 +18,7 @@ import taxonomyRoutes from './routes/taxonomy.js';
 import adminRoutes from './routes/admin.js';
 import stripeRoutes from './routes/stripe.js';
 import leadRoutes from './routes/leads.js';
+import chatRoutes from './routes/chat.js';
 import { BRAND } from './config/brand.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -48,6 +49,7 @@ app.use('/api/v1/taxonomy', taxonomyRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/stripe', stripeRoutes);
 app.use('/api/v1/leads', leadRoutes);
+app.use('/api/v1/chat', chatRoutes);
 
 // Serve the React build in production
 if (process.env.NODE_ENV === 'production') {
