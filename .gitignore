@@ -10,7 +10,7 @@ node_modules/
 client/dist/
 
 # User uploads
-uploads/*
+# uploads/*
 !uploads/.gitkeep
 
 # Logs
