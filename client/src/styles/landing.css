@@ -2184,9 +2184,10 @@ body.landing-active{margin:0;font-family:var(--font-body);color:var(--ink);backg
 .form{background:#fff;border:1px solid var(--line);border-radius:var(--r-2xl);padding:34px;box-shadow:var(--e1)}
 .field{margin-bottom:18px}
 .field label{display:block;font-weight:600;font-size:.88rem;margin-bottom:7px}
-.field input,.field select,.field textarea{width:100%;padding:13px 15px;border-radius:var(--r-md);
+.field input,.field select,.field textarea{width:100%;box-sizing:border-box;padding:13px 15px;border-radius:var(--r-md);
   border:1.5px solid var(--slate-200);font-family:inherit;font-size:.95rem;color:var(--ink);
   background:#fff;transition:border .2s,box-shadow .2s}
+.field select{appearance:none;-webkit-appearance:none;height:48px;padding-right:42px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:16px;cursor:pointer}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--indigo-400);
   box-shadow:var(--ring)}
 .field textarea{resize:vertical;min-height:130px}

@@ -5,8 +5,15 @@ import { authenticate, requireRole } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/error.js';
 import { upload } from '../middleware/upload.js';
 import { transitionCollaboration } from '../services/collaborationWorkflow.js';
+import { ensureThreadForCollaboration } from '../services/messageService.js';
+import { createNotification } from '../services/notificationService.js';
 
 const router = Router();
+
+const setUploadType = (type) => (req, _res, next) => {
+  req.uploadType = type;
+  next();
+};
 
 router.get('/', authenticate, asyncHandler(async (req, res) => {
   const { role, status, page = 1, limit = 20 } = req.query;
@@ -17,6 +24,9 @@ router.get('/', authenticate, asyncHandler(async (req, res) => {
     where.campaign = { advertiserId: adv?.id };
   } else if (req.user.role === 'CREATOR') {
     where.creatorUserId = req.user.id;
+    if (req.query.includePending !== 'true') {
+      where.status = { not: 'APPLICATION_PENDING' };
+    }
   }
 
   if (status) where.status = status;
@@ -30,6 +40,7 @@ router.get('/', authenticate, asyncHandler(async (req, res) => {
         events: { orderBy: { createdAt: 'asc' } },
         proofs: true,
         content: true,
+        reviewFeedback: { orderBy: { createdAt: 'asc' } },
       },
       orderBy: { updatedAt: 'desc' },
       skip: (page - 1) * limit,
@@ -50,6 +61,7 @@ router.get('/:id', authenticate, asyncHandler(async (req, res) => {
       events: { orderBy: { createdAt: 'asc' } },
       proofs: true,
       content: true,
+      reviewFeedback: { orderBy: { createdAt: 'asc' } },
       thread: { include: { messages: { include: { sender: true }, orderBy: { createdAt: 'asc' } } } },
     },
   });
@@ -57,7 +69,7 @@ router.get('/:id', authenticate, asyncHandler(async (req, res) => {
   res.json({ collaboration });
 }));
 
-router.post('/:id/content', authenticate, requireRole('ADVERTISER'), upload.single('file'), asyncHandler(async (req, res) => {
+router.post('/:id/content', authenticate, requireRole('ADVERTISER'), setUploadType('content'), upload.single('file'), asyncHandler(async (req, res) => {
   const adv = await prisma.advertiserProfile.findUnique({ where: { userId: req.user.id } });
   const collaboration = await prisma.collaboration.findFirst({
     where: { id: req.params.id, campaign: { advertiserId: adv?.id } },
@@ -75,7 +87,9 @@ router.post('/:id/content', authenticate, requireRole('ADVERTISER'), upload.sing
   });
 
   await transitionCollaboration(collaboration.id, 'CONTENT_PROVIDED', req.user);
-  res.status(201).json({ content });
+
+  const thread = await ensureThreadForCollaboration(collaboration.id);
+  res.status(201).json({ content, threadId: thread.id });
 }));
 
 router.post('/:id/publish', authenticate, requireRole('CREATOR'), asyncHandler(async (req, res) => {
@@ -84,10 +98,12 @@ router.post('/:id/publish', authenticate, requireRole('CREATOR'), asyncHandler(a
   });
   if (!collaboration) return res.status(404).json({ error: 'Not found' });
   await transitionCollaboration(collaboration.id, 'PUBLISHED', req.user);
-  res.json({ success: true });
+
+  const thread = await ensureThreadForCollaboration(collaboration.id);
+  res.json({ success: true, threadId: thread.id });
 }));
 
-router.post('/:id/proof', authenticate, requireRole('CREATOR'), upload.single('screenshot'), asyncHandler(async (req, res) => {
+router.post('/:id/proof', authenticate, requireRole('CREATOR'), setUploadType('proofs'), upload.single('screenshot'), asyncHandler(async (req, res) => {
   const { proofUrl, notes } = z.object({
     proofUrl: z.string().url(),
     notes: z.string().optional(),
@@ -108,7 +124,9 @@ router.post('/:id/proof', authenticate, requireRole('CREATOR'), upload.single('s
   });
 
   await transitionCollaboration(collaboration.id, 'PROOF_SUBMITTED', req.user);
-  res.status(201).json({ proof });
+
+  const thread = await ensureThreadForCollaboration(collaboration.id);
+  res.status(201).json({ proof, threadId: thread.id });
 }));
 
 router.post('/:id/verify', authenticate, asyncHandler(async (req, res) => {
@@ -130,17 +148,49 @@ router.post('/:id/verify', authenticate, asyncHandler(async (req, res) => {
   await transitionCollaboration(collaboration.id, 'VERIFIED', req.user);
   await transitionCollaboration(collaboration.id, 'RELEASED', { role: 'SYSTEM' });
   await transitionCollaboration(collaboration.id, 'PAID_OUT', { role: 'SYSTEM' });
-  res.json({ success: true });
+
+  const thread = await ensureThreadForCollaboration(collaboration.id);
+  res.json({ success: true, threadId: thread.id });
 }));
 
-router.post('/:id/request-changes', authenticate, requireRole('ADVERTISER'), asyncHandler(async (req, res) => {
+router.post('/:id/request-changes', authenticate, requireRole('ADVERTISER'), setUploadType('reviews'), upload.single('file'), asyncHandler(async (req, res) => {
   const adv = await prisma.advertiserProfile.findUnique({ where: { userId: req.user.id } });
   const collaboration = await prisma.collaboration.findFirst({
     where: { id: req.params.id, campaign: { advertiserId: adv?.id } },
   });
   if (!collaboration) return res.status(404).json({ error: 'Not found' });
-  await transitionCollaboration(collaboration.id, 'PUBLISHED', req.user, req.body.notes || 'Changes requested');
-  res.json({ success: true });
+
+  if (!['PROOF_SUBMITTED', 'IN_REVIEW'].includes(collaboration.status)) {
+    return res.status(400).json({ error: 'Changes can only be requested while proof is under review.' });
+  }
+
+  const notes = (req.body.notes || '').trim();
+  if (!notes) return res.status(400).json({ error: 'Please describe what needs to change.' });
+
+  const feedback = await prisma.collaborationReviewFeedback.create({
+    data: {
+      collaborationId: collaboration.id,
+      notes,
+      filePath: req.file ? `/uploads/reviews/${req.file.filename}` : null,
+      fileName: req.file?.originalname,
+    },
+  });
+
+  if (collaboration.status === 'PROOF_SUBMITTED') {
+    await transitionCollaboration(collaboration.id, 'IN_REVIEW', { role: 'SYSTEM' }, 'Moved to review');
+  }
+  await transitionCollaboration(collaboration.id, 'PUBLISHED', req.user, `Changes requested: ${notes}`);
+
+  const thread = await ensureThreadForCollaboration(collaboration.id);
+  await createNotification(
+    collaboration.creatorUserId,
+    'collaboration',
+    'Changes requested on your proof',
+    notes,
+    { collaborationId: collaboration.id, threadId: thread.id },
+  );
+
+  res.json({ success: true, threadId: thread.id, feedback });
 }));
 
 router.post('/:id/dispute', authenticate, asyncHandler(async (req, res) => {

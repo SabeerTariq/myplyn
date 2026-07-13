@@ -248,7 +248,9 @@ model CreatorPage {
   avgReach           Int                @default(0) @map("avg_reach")
   engagement         Float?
   country            String?
+  state              String?
   city               String?
+  customNiche        String?            @map("custom_niche")
   verificationStatus VerificationStatus @default(PENDING) @map("verification_status")
   adminVerifiedAt    DateTime?          @map("admin_verified_at")
   adminNotes         String?            @db.Text @map("admin_notes")
@@ -391,6 +393,7 @@ model Collaboration {
   page      CreatorPage @relation(fields: [pageId], references: [id])
   content   CollaborationContent[]
   proofs    CollaborationProof[]
+  reviewFeedback CollaborationReviewFeedback[]
   events    CollaborationEvent[]
   transactions Transaction[]
   thread    MessageThread?
@@ -424,6 +427,19 @@ model CollaborationProof {
   collaboration Collaboration @relation(fields: [collaborationId], references: [id], onDelete: Cascade)
 
   @@map("collaboration_proofs")
+}
+
+model CollaborationReviewFeedback {
+  id              String   @id @default(uuid())
+  collaborationId String   @map("collaboration_id")
+  notes           String   @db.Text
+  filePath        String?  @map("file_path")
+  fileName        String?  @map("file_name")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  collaboration Collaboration @relation(fields: [collaborationId], references: [id], onDelete: Cascade)
+
+  @@map("collaboration_review_feedback")
 }
 
 model CollaborationEvent {

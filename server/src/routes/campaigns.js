@@ -5,6 +5,7 @@ import { authenticate, requireRole } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/error.js';
 import { upload } from '../middleware/upload.js';
 import { fundWallet, getOrCreateWallet } from '../services/walletService.js';
+import { createNotification } from '../services/notificationService.js';
 
 const router = Router();
 
@@ -222,15 +223,55 @@ router.post('/:id/applications/:appId/approve', asyncHandler(async (req, res) =>
   const collab = await createCollaborationFromApplication(application);
   await transitionCollaboration(collab.id, 'ACCEPTED', req.user, 'Application approved');
 
-  res.json({ success: true });
+  res.json({ success: true, collaborationId: collab.id });
 }));
 
 router.post('/:id/applications/:appId/reject', asyncHandler(async (req, res) => {
   const advertiser = await getAdvertiser(req);
-  await prisma.campaignApplication.updateMany({
+  const { notes } = z.object({ notes: z.string().max(500).optional() }).parse(req.body);
+
+  const application = await prisma.campaignApplication.findFirst({
     where: { id: req.params.appId, campaign: { advertiserId: advertiser.id } },
+  });
+  if (!application) return res.status(404).json({ error: 'Application not found' });
+
+  await prisma.campaignApplication.update({
+    where: { id: application.id },
     data: { status: 'REJECTED' },
   });
+
+  const collab = await prisma.collaboration.findFirst({
+    where: {
+      campaignId: application.campaignId,
+      creatorUserId: application.creatorUserId,
+      pageId: application.pageId,
+      status: 'APPLICATION_PENDING',
+    },
+  });
+  if (collab) {
+    await prisma.collaboration.update({
+      where: { id: collab.id },
+      data: { status: 'CANCELLED' },
+    });
+    await prisma.collaborationEvent.create({
+      data: {
+        collaborationId: collab.id,
+        fromStatus: 'APPLICATION_PENDING',
+        toStatus: 'CANCELLED',
+        actorUserId: req.user.id,
+        notes: notes || 'Proposal declined',
+      },
+    });
+  }
+
+  await createNotification(
+    application.creatorUserId,
+    'application',
+    'Proposal declined',
+    notes || 'The brand declined your proposal for this campaign.',
+    { applicationId: application.id, campaignId: application.campaignId },
+  );
+
   res.json({ success: true });
 }));
 

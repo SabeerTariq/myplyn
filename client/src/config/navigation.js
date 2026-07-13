@@ -4,12 +4,13 @@ export const advertiserNav = {
     { key: 'dashboard', label: 'Dashboard', path: '/advertiser', icon: 'dashboard' },
     { key: 'campaigns', label: 'Campaigns', path: '/advertiser/campaigns', icon: 'campaign' },
     { key: 'marketplace', label: 'Creator Marketplace', path: '/advertiser/marketplace', icon: 'storefront' },
+    { key: 'proposals', label: 'Proposals', path: '/advertiser/proposals', icon: 'description', badgeKey: 'applications' },
     { key: 'collaborations', label: 'Collaborations', path: '/advertiser/collaborations', icon: 'handshake', badgeKey: 'proofsToVerify' },
     { key: 'wallet', label: 'Wallet & Payments', path: '/advertiser/wallet', icon: 'account_balance_wallet' },
     { key: 'messages', label: 'Messages', path: '/advertiser/messages', icon: 'forum', badgeKey: 'messages' },
+    { key: 'settings', label: 'Settings', path: '/advertiser/settings', icon: 'settings' },
   ],
   utility: [
-    { key: 'settings', label: 'Settings', path: '/advertiser/settings', icon: 'settings' },
     { key: 'help', label: 'Help & Support', path: '/advertiser/help', icon: 'help' },
   ],
 };
@@ -19,14 +20,15 @@ export const creatorNav = {
   primary: [
     { key: 'dashboard', label: 'Dashboard', path: '/creator', icon: 'dashboard' },
     { key: 'pages', label: 'My Pages', path: '/creator/pages', icon: 'web' },
-    { key: 'discover', label: 'Discover Campaigns', path: '/creator/discover', icon: 'travel_explore' },
+    { key: 'marketplace', label: 'Marketplace', path: '/creator/marketplace', icon: 'storefront' },
+    { key: 'applications', label: 'Proposals', path: '/creator/proposals', icon: 'description' },
     { key: 'invitations', label: 'Invitations', path: '/creator/invitations', icon: 'mail', badgeKey: 'invitations' },
-    { key: 'collaborations', label: 'Collaborations', path: '/creator/collaborations', icon: 'handshake', badgeKey: 'collaborations' },
-    { key: 'earnings', label: 'Earnings & Payouts', path: '/creator/earnings', icon: 'payments' },
+    { key: 'earnings', label: 'Earnings', path: '/creator/earnings', icon: 'payments' },
     { key: 'messages', label: 'Messages', path: '/creator/messages', icon: 'forum', badgeKey: 'messages' },
+    { key: 'analytics', label: 'Collaborations', path: '/creator/collaborations', icon: 'monitoring', badgeKey: 'collaborations' },
+    { key: 'settings', label: 'Settings', path: '/creator/settings', icon: 'settings' },
   ],
   utility: [
-    { key: 'settings', label: 'Settings', path: '/creator/settings', icon: 'settings' },
     { key: 'help', label: 'Help & Support', path: '/creator/help', icon: 'help' },
   ],
 };
@@ -43,6 +45,7 @@ export const adminNav = {
   ],
   utility: [
     { key: 'settings', label: 'Settings', path: '/admin/settings', icon: 'settings', permission: 'settings.read' },
+    { key: 'help', label: 'Help & Support', path: '/admin/settings', icon: 'help', permission: 'settings.read' },
   ],
 };
 

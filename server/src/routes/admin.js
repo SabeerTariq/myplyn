@@ -5,6 +5,8 @@ import { authenticate, requireRole } from '../middleware/auth.js';
 import { requirePermission } from '../middleware/rbac.js';
 import { asyncHandler } from '../middleware/error.js';
 import { transitionCollaboration } from '../services/collaborationWorkflow.js';
+import { createNotification } from '../services/notificationService.js';
+import { displayLocation, displayNiche } from '../services/pageVerificationService.js';
 
 const router = Router();
 router.use(authenticate, requireRole('ADMIN'));
@@ -147,7 +149,11 @@ router.get('/review-queue', requirePermission('review.read'), asyncHandler(async
     if (item.type === 'PROOF') {
       const page = await prisma.creatorPage.findUnique({
         where: { id: item.entityId },
-        include: { platform: true, creator: true },
+        include: {
+          platform: true,
+          niche: true,
+          creator: { include: { user: true } },
+        },
       });
       return { ...item, page };
     }
@@ -163,10 +169,14 @@ router.post('/review-queue/:id/resolve', requirePermission('review.write'), asyn
 
   const { action, notes } = req.body;
 
-  if (item.type === 'PROOF' && action === 'verify') {
+  if (item.type === 'PROOF' && action === 'reject') {
     await prisma.creatorPage.update({
       where: { id: item.entityId },
-      data: { verificationStatus: 'VERIFIED', adminVerifiedAt: new Date(), adminNotes: notes },
+      data: {
+        verificationStatus: 'REJECTED',
+        adminVerifiedAt: new Date(),
+        adminNotes: notes || 'Rejected by admin review',
+      },
     });
   }
 
@@ -198,6 +208,12 @@ router.post('/pages/:id/verify', requirePermission('review.write'), asyncHandler
     notes: z.string().optional(),
   }).parse(req.body);
 
+  const existing = await prisma.creatorPage.findUnique({
+    where: { id: req.params.id },
+    include: { creator: true, platform: true, niche: true },
+  });
+  if (!existing) return res.status(404).json({ error: 'Page not found' });
+
   const page = await prisma.creatorPage.update({
     where: { id: req.params.id },
     data: {
@@ -205,7 +221,18 @@ router.post('/pages/:id/verify', requirePermission('review.write'), asyncHandler
       adminVerifiedAt: new Date(),
       adminNotes: notes,
     },
+    include: { platform: true, niche: true, creator: { include: { user: true } } },
   });
+
+  await createNotification(
+    existing.creator.userId,
+    'page_verification',
+    status === 'VERIFIED' ? 'Page verified' : 'Page verification declined',
+    status === 'VERIFIED'
+      ? `Your page "${existing.name}" has been verified and is now live in the marketplace.`
+      : `Your page "${existing.name}" was not approved.${notes ? ` Note: ${notes}` : ' Please update your details and resubmit.'}`,
+    { pageId: page.id, status },
+  );
 
   await prisma.auditLog.create({
     data: {
@@ -213,7 +240,7 @@ router.post('/pages/:id/verify', requirePermission('review.write'), asyncHandler
       action: 'PAGE_VERIFY',
       entityType: 'CREATOR_PAGE',
       entityId: page.id,
-      metadata: { status, notes },
+      metadata: { status, notes, niche: displayNiche(page), location: displayLocation(page) },
     },
   });
 

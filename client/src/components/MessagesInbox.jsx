@@ -1,11 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { messagesApi } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
-import PageHeader from './PageHeader';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import ListOrEmpty from './ListOrEmpty';
 import Icon from './Icon';
+import StatusPill from './StatusPill';
+import CollaborationThreadContext from './messages/CollaborationThreadContext';
+import MessageActivityCard from './messages/MessageActivityCard';
+import { buildThreadFeed, isMessagingWorkspace } from '../utils/messageThread';
+import '../styles/messages.css';
 
 function formatTime(dateStr) {
   if (!dateStr) return '';
@@ -34,11 +39,11 @@ function threadSubtitle(thread, role) {
   return thread.collaboration?.page?.name || thread.collaboration?.campaign?.advertiser?.companyName || '';
 }
 
-function senderLabel(sender, user) {
-  if (!sender) return 'Unknown';
-  if (sender.id === user?.id) return 'You';
-  if (sender.role === 'ADMIN') return 'Admin';
-  return sender.email?.split('@')[0] || 'Partner';
+function collabPathFor(role, collaborationId) {
+  if (!collaborationId || role === 'ADMIN') return null;
+  return role === 'ADVERTISER'
+    ? `/advertiser/collaborations/${collaborationId}`
+    : `/creator/collaborations/${collaborationId}`;
 }
 
 export default function MessagesInbox({ role, basePath, breadcrumbs, shell: Shell }) {
@@ -47,11 +52,14 @@ export default function MessagesInbox({ role, basePath, breadcrumbs, shell: Shel
   const { user } = useAuth();
   const qc = useQueryClient();
   const [draft, setDraft] = useState('');
+  const [contextOpen, setContextOpen] = useState(false);
+  const feedRef = useRef(null);
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
   const { data: listData, isLoading: listLoading } = useQuery({
     queryKey: ['threads'],
     queryFn: () => messagesApi.threads().then((r) => r.data),
-    refetchInterval: 15000,
+    refetchInterval: 10000,
   });
 
   const { data: threadData, isLoading: threadLoading } = useQuery({
@@ -60,6 +68,28 @@ export default function MessagesInbox({ role, basePath, breadcrumbs, shell: Shel
     enabled: !!threadId,
     refetchInterval: threadId ? 5000 : false,
   });
+
+  useEffect(() => {
+    if (!threadData?.thread || !threadId) return;
+    qc.invalidateQueries({ queryKey: ['badgeCounts'] });
+    qc.invalidateQueries({ queryKey: ['threads'] });
+    if (typeof threadData.unreadTotal === 'number') {
+      qc.setQueryData(['badgeCounts'], (prev) => {
+        if (!prev) return prev;
+        return { ...prev, messages: threadData.unreadTotal };
+      });
+    }
+  }, [threadData?.thread?.id, threadData?.unreadTotal, threadId, qc]);
+
+  useEffect(() => {
+    setContextOpen(false);
+  }, [threadId]);
+
+  useEffect(() => {
+    if (!contextOpen) return undefined;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, [contextOpen]);
 
   const sendMut = useMutation({
     mutationFn: (body) => messagesApi.send(threadId, body),
@@ -73,43 +103,82 @@ export default function MessagesInbox({ role, basePath, breadcrumbs, shell: Shel
 
   const threads = listData?.threads || [];
   const activeThread = threadData?.thread;
+  const unreadTotal = threads.reduce((sum, t) => sum + (t.unreadCount || 0), 0);
+
+  useEffect(() => {
+    if (typeof listData?.unreadTotal !== 'number') return;
+    qc.setQueryData(['badgeCounts'], (prev) => {
+      if (!prev) return prev;
+      return { ...prev, messages: listData.unreadTotal };
+    });
+  }, [listData?.unreadTotal, qc]);
+
+  const collaboration = activeThread?.collaboration;
+  const workspaceOpen = isMessagingWorkspace(collaboration?.status);
+  const collabPath = collabPathFor(role, activeThread?.collaborationId);
+
+  const feed = useMemo(
+    () => buildThreadFeed(collaboration, activeThread?.messages || []),
+    [collaboration, activeThread?.messages],
+  );
+
+  const lastFeedKey = feed.length
+    ? `${feed[feed.length - 1].type}-${feed[feed.length - 1].data?.id || feed.length}`
+    : null;
+
+  useEffect(() => {
+    if (!threadId || !activeThread) return;
+    const scrollToBottom = () => {
+      if (feedRef.current) {
+        feedRef.current.scrollTop = feedRef.current.scrollHeight;
+      }
+    };
+    const raf = requestAnimationFrame(scrollToBottom);
+    return () => cancelAnimationFrame(raf);
+  }, [threadId, activeThread, lastFeedKey, feed.length]);
 
   const handleSend = (e) => {
     e.preventDefault();
     const body = draft.trim();
-    if (!body || !threadId) return;
+    if (!body || !threadId || role === 'ADMIN') return;
     sendMut.mutate(body);
   };
 
+  const gridClass = threadId
+    ? 'msg-inbox-grid msg-inbox-grid--with-thread'
+    : threads.length > 0
+      ? 'msg-inbox-grid msg-inbox-grid--list-only'
+      : 'msg-inbox-grid';
+
+  const showMobileContext = isMobile && threadId && activeThread && role !== 'ADMIN';
+
   return (
     <Shell breadcrumbs={breadcrumbs}>
-      <PageHeader title="Messages" />
+      <div className="msg-page">
+        <div className="card msg-inbox-card">
+          <div className={gridClass}>
+            {!threadId && (
+              <div className="msg-list-header hide-above-tablet">
+                <h2 className="msg-list-header__title">Inbox</h2>
+                {unreadTotal > 0 && (
+                  <span className="msg-list-header__badge">{unreadTotal} unread</span>
+                )}
+              </div>
+            )}
 
-      <div className="card" style={{ padding: 0, overflow: 'hidden', minHeight: 520 }}>
-        <div
-          className={
-            threadId
-              ? 'grid grid-cols-1 md:grid-cols-[minmax(260px,320px)_1fr]'
-              : threads.length > 0
-                ? 'grid grid-cols-1 md:grid-cols-[minmax(260px,320px)_1fr]'
-                : 'grid grid-cols-1'
-          }
-          style={{ minHeight: 520 }}
-        >
-          <div
-            className={threadId ? 'hidden md:block' : ''}
-            style={{ borderRight: '1px solid var(--border)', overflowY: 'auto' }}
-          >
+            <div className={`msg-thread-list${threadId ? ' msg-thread-list--hidden-mobile' : ''}`}>
               {listLoading ? (
-                <p className="text-muted" style={{ padding: 20 }}>Loading conversations…</p>
+                <p className="text-muted msg-list-loading">Loading conversations…</p>
               ) : (
                 <ListOrEmpty
                   items={threads}
                   empty={
-                    <div style={{ padding: 32, textAlign: 'center' }} className="text-muted">
-                      <Icon name="forum" size={40} style={{ marginBottom: 12, opacity: 0.4 }} />
-                      <p>No conversations yet.</p>
-                      <p style={{ fontSize: 12, marginTop: 8 }}>Messages appear when you have active collaborations.</p>
+                    <div className="msg-list-empty text-muted">
+                      <Icon name="forum" size={40} />
+                      <p>No active collaboration messages yet.</p>
+                      <p className="msg-list-empty__hint">
+                        Threads appear once a proposal is accepted by both sides. The workspace opens when promotional content is shared.
+                      </p>
                     </div>
                   }
                 >
@@ -120,22 +189,25 @@ export default function MessagesInbox({ role, basePath, breadcrumbs, shell: Shel
                       <Link
                         key={t.id}
                         to={`${basePath}/${t.id}`}
-                        style={{
-                          display: 'block',
-                          padding: '14px 16px',
-                          borderBottom: '1px solid var(--border)',
-                          background: active ? 'var(--accent-soft)' : 'transparent',
-                          textDecoration: 'none',
-                          color: 'inherit',
-                        }}
+                        className={`msg-thread-item ${active ? 'msg-thread-item--active' : ''}`}
                       >
-                        <div style={{ fontWeight: 700, fontSize: 13 }}>{threadTitle(t, role)}</div>
-                        <div className="text-muted" style={{ fontSize: 11.5, marginTop: 2 }}>{threadSubtitle(t, role)}</div>
-                        {preview && (
-                          <div style={{ fontSize: 12, marginTop: 6, color: 'var(--text-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {preview.senderId === user?.id ? 'You: ' : ''}{preview.body}
-                          </div>
-                        )}
+                        <div className="msg-thread-item-top">
+                          <div className="msg-thread-item-title">{threadTitle(t, role)}</div>
+                          {t.unreadCount > 0 && (
+                            <span className="msg-thread-unread">{t.unreadCount > 9 ? '9+' : t.unreadCount}</span>
+                          )}
+                        </div>
+                        <div className="msg-thread-item-meta">
+                          {t.collaboration?.status && (
+                            <StatusPill status={t.collaboration.status} />
+                          )}
+                          <span className="msg-thread-item-sub">
+                            {threadSubtitle(t, role)}
+                            {preview && (
+                              <>{' · '}{preview.senderId === user?.id ? 'You: ' : ''}{preview.body}</>
+                            )}
+                          </span>
+                        </div>
                       </Link>
                     );
                   })}
@@ -143,106 +215,150 @@ export default function MessagesInbox({ role, basePath, breadcrumbs, shell: Shel
               )}
             </div>
 
-          {threadId ? (
-            <div style={{ display: 'flex', flexDirection: 'column', minHeight: 520 }}>
-              {threadLoading ? (
-                <p className="text-muted" style={{ padding: 20 }}>Loading conversation…</p>
-              ) : !activeThread ? (
-                <div style={{ padding: 32, textAlign: 'center' }} className="text-muted">
-                  <p>Conversation not found.</p>
-                  <button type="button" className="btn-ghost" style={{ marginTop: 12 }} onClick={() => navigate(basePath)}>Back to inbox</button>
-                </div>
-              ) : (
-                <>
-                  <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)' }}>
-                    <button
-                      type="button"
-                      className="btn-ghost"
-                      style={{ marginBottom: 10, height: 32, padding: '0 10px', fontSize: 12 }}
-                      onClick={() => navigate(basePath)}
-                    >
-                      <Icon name="arrow_back" size={16} /> Inbox
-                    </button>
-                    <div style={{ fontWeight: 700 }}>{threadTitle(activeThread, role)}</div>
-                    <div className="text-muted" style={{ fontSize: 12, marginTop: 2 }}>
-                      {threadSubtitle(activeThread, role)}
-                      {activeThread.collaboration?.status && (
-                        <span style={{ marginLeft: 8 }}>· {activeThread.collaboration.status.replace(/_/g, ' ').toLowerCase()}</span>
+            {threadId ? (
+              <div className="msg-thread-main">
+                {threadLoading ? (
+                  <p className="text-muted msg-list-loading">Loading conversation…</p>
+                ) : !activeThread ? (
+                  <div className="msg-thread-empty text-muted">
+                    <p>Conversation not found or not yet active.</p>
+                    <button type="button" className="btn-ghost" onClick={() => navigate(basePath)}>Back to inbox</button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="msg-thread-header">
+                      <div className="msg-thread-header-top">
+                        <button
+                          type="button"
+                          className="btn-ghost msg-thread-back touch-target"
+                          onClick={() => navigate(basePath)}
+                          aria-label="Back to inbox"
+                        >
+                          <Icon name="arrow_back" size={20} />
+                        </button>
+                        <div className="msg-thread-header-titles">
+                          <h2>{threadTitle(activeThread, role)}</h2>
+                          <p className="msg-thread-header-lead">{threadSubtitle(activeThread, role)}</p>
+                        </div>
+                        <div className="msg-thread-header-actions">
+                          {collaboration?.status && (
+                            <span className="msg-thread-header-status hide-mobile">
+                              <StatusPill status={collaboration.status} />
+                            </span>
+                          )}
+                          {showMobileContext && (
+                            <button
+                              type="button"
+                              className="msg-context-toggle touch-target"
+                              onClick={() => setContextOpen(true)}
+                              aria-label="Conversation details"
+                            >
+                              <Icon name="info" size={20} />
+                            </button>
+                          )}
+                          {collabPath && isMobile && (
+                            <Link
+                              to={collabPath}
+                              className="msg-context-toggle touch-target"
+                              aria-label="Open collaboration"
+                            >
+                              <Icon name="handshake" size={20} />
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                      {!workspaceOpen && collaboration?.status === 'ACCEPTED' && (
+                        <p className="msg-context-hint msg-thread-header-hint">
+                          {role === 'ADVERTISER'
+                            ? 'Provide campaign content from the collaboration page to unlock this workspace.'
+                            : 'The brand will share assets soon. You will be notified when this workspace opens.'}
+                        </p>
                       )}
                     </div>
-                    {activeThread.collaborationId && role !== 'ADMIN' && (
-                      <Link
-                        to={role === 'ADVERTISER'
-                          ? `/advertiser/collaborations/${activeThread.collaborationId}`
-                          : `/creator/collaborations/${activeThread.collaborationId}`}
-                        className="text-accent-link"
-                        style={{ fontSize: 12, display: 'inline-block', marginTop: 6 }}
-                      >
-                        View collaboration →
-                      </Link>
-                    )}
-                  </div>
 
-                  <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    <ListOrEmpty
-                      items={activeThread.messages}
-                      empty={<p className="text-muted text-center" style={{ marginTop: 40 }}>No messages yet. Say hello!</p>}
-                    >
-                      {(messages) => messages.map((m) => {
-                        const mine = m.senderId === user?.id;
-                        return (
-                          <div key={m.id} style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start' }}>
-                            <div
-                              style={{
-                                maxWidth: '75%',
-                                padding: '10px 14px',
-                                borderRadius: mine ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
-                                background: mine ? 'var(--accent-soft)' : 'var(--surface-2)',
-                                border: `1px solid ${mine ? 'color-mix(in oklch, var(--accent) 20%, var(--border))' : 'var(--border)'}`,
-                              }}
-                            >
-                              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', marginBottom: 4 }}>
-                                {senderLabel(m.sender, user)}
-                              </div>
-                              <div style={{ fontSize: 13, lineHeight: 1.45, whiteSpace: 'pre-wrap' }}>{m.body}</div>
-                              <div style={{ fontSize: 10, color: 'var(--text-3)', marginTop: 6, textAlign: 'right' }}>
-                                {formatTime(m.createdAt)}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </ListOrEmpty>
-                  </div>
-
-                  {role !== 'ADMIN' ? (
-                    <form onSubmit={handleSend} style={{ padding: '14px 18px', borderTop: '1px solid var(--border)', display: 'flex', gap: 10 }}>
-                      <input
-                        className="input"
-                        placeholder="Write a message…"
-                        value={draft}
-                        onChange={(e) => setDraft(e.target.value)}
-                        disabled={sendMut.isPending}
-                      />
-                      <button type="submit" className="btn-primary" disabled={!draft.trim() || sendMut.isPending}>
-                        <Icon name="send" size={18} />
-                        Send
-                      </button>
-                    </form>
-                  ) : (
-                    <div className="text-muted" style={{ padding: '14px 18px', borderTop: '1px solid var(--border)', fontSize: 12 }}>
-                      Admin view — read-only moderation access.
+                    <div className="msg-thread-feed" ref={feedRef}>
+                      {feed.map((item, idx) => (
+                        <MessageActivityCard
+                          key={`${item.type}-${item.data?.id || idx}`}
+                          item={item}
+                          role={role}
+                          user={user}
+                          collaboration={collaboration}
+                        />
+                      ))}
                     </div>
-                  )}
-                </>
-              )}
-            </div>
-          ) : !threadId && threads.length > 0 ? (
-            <div className="hidden md:flex" style={{ alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', fontSize: 13 }}>
-              Select a conversation to view messages
-            </div>
-          ) : null}
+
+                    {role !== 'ADMIN' ? (
+                      <form onSubmit={handleSend} className="msg-compose">
+                        <input
+                          className="input msg-compose-input"
+                          placeholder={workspaceOpen ? 'Message…' : 'Workspace opens after content is shared…'}
+                          value={draft}
+                          onChange={(e) => setDraft(e.target.value)}
+                          disabled={sendMut.isPending || !workspaceOpen}
+                        />
+                        <button
+                          type="submit"
+                          className="btn-primary msg-compose-send touch-target"
+                          disabled={!draft.trim() || sendMut.isPending || !workspaceOpen}
+                          aria-label="Send message"
+                        >
+                          <Icon name="send" size={20} />
+                          <span className="msg-compose-send-label">Send</span>
+                        </button>
+                      </form>
+                    ) : (
+                      <div className="text-muted msg-compose msg-compose--readonly">
+                        Admin view — read-only moderation access.
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ) : !threadId && threads.length > 0 ? (
+              <div className="msg-inbox-placeholder">
+                Select a collaboration workspace
+              </div>
+            ) : null}
+
+            {threadId && activeThread && role !== 'ADMIN' && !isMobile && (
+              <CollaborationThreadContext
+                collaboration={collaboration}
+                role={role}
+                collabPath={collabPath}
+              />
+            )}
+          </div>
         </div>
+
+        {showMobileContext && contextOpen && (
+          <>
+            <button
+              type="button"
+              className="msg-context-backdrop"
+              onClick={() => setContextOpen(false)}
+              aria-label="Close details"
+            />
+            <div className="msg-context-drawer safe-bottom">
+              <div className="msg-context-drawer-head">
+                <h3>Conversation details</h3>
+                <button
+                  type="button"
+                  className="msg-context-drawer-close touch-target"
+                  onClick={() => setContextOpen(false)}
+                  aria-label="Close details"
+                >
+                  <Icon name="close" size={22} />
+                </button>
+              </div>
+              <CollaborationThreadContext
+                collaboration={collaboration}
+                role={role}
+                collabPath={collabPath}
+              />
+            </div>
+          </>
+        )}
       </div>
     </Shell>
   );

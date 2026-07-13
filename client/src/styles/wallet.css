@@ -1,0 +1,265 @@
+.wallet-fund-card {
+  background: linear-gradient(180deg, color-mix(in oklch, var(--accent) 5%, var(--surface)) 0%, var(--surface) 42%);
+  border: 1px solid color-mix(in oklch, var(--accent) 18%, var(--border));
+  border-radius: var(--dashboard-radius-sm);
+  padding: 20px;
+  margin-bottom: 22px;
+  box-shadow: 0 10px 28px rgba(14, 42, 94, 0.05);
+}
+
+.wallet-fund-card--compact {
+  background: var(--surface);
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 0;
+  box-shadow: none;
+}
+
+.wallet-fund-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.wallet-fund-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  color: var(--accent-text);
+  background: color-mix(in oklch, var(--accent) 14%, white);
+  border: 1px solid color-mix(in oklch, var(--accent) 22%, var(--border));
+}
+
+.wallet-fund-card__title {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.wallet-fund-card__lead {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-2);
+  max-width: 52ch;
+}
+
+.wallet-fund-card__form {
+  display: grid;
+  gap: 16px;
+}
+
+.wallet-fund-card__section {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.wallet-fund-card__label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.wallet-fund-card__presets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.wallet-fund-card__preset {
+  height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.wallet-fund-card__preset:hover:not(:disabled) {
+  border-color: color-mix(in oklch, var(--accent) 35%, var(--border));
+  color: var(--accent-text);
+}
+
+.wallet-fund-card__preset.is-active {
+  border-color: var(--accent);
+  background: color-mix(in oklch, var(--accent) 10%, white);
+  color: var(--accent-text);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 14%, transparent);
+}
+
+.wallet-fund-card__preset:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.wallet-fund-card__amount-wrap {
+  position: relative;
+}
+
+.wallet-fund-card__currency {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+.wallet-fund-card__amount {
+  padding-left: 30px;
+  font-size: 16px;
+  font-weight: 700;
+  height: 48px;
+}
+
+.wallet-fund-card__amount::-webkit-outer-spin-button,
+.wallet-fund-card__amount::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.wallet-fund-card__amount[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.wallet-fund-card__summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.wallet-fund-card__summary-item {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.wallet-fund-card__summary-item span {
+  font-size: 12px;
+  color: var(--text-3);
+  font-weight: 600;
+}
+
+.wallet-fund-card__summary-item strong {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.wallet-fund-card__summary-item strong.is-highlight {
+  color: var(--accent-text);
+}
+
+.wallet-fund-card__feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.wallet-fund-card__feedback--success {
+  background: color-mix(in oklch, var(--good) 12%, white);
+  border: 1px solid color-mix(in oklch, var(--good) 28%, var(--border));
+  color: color-mix(in oklch, var(--good) 72%, black);
+}
+
+.wallet-fund-card__feedback--error {
+  background: color-mix(in oklch, var(--bad) 10%, white);
+  border: 1px solid color-mix(in oklch, var(--bad) 24%, var(--border));
+  color: color-mix(in oklch, var(--bad) 70%, black);
+}
+
+.wallet-fund-card__submit {
+  width: 100%;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.wallet-fund-card__submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.wallet-fund-card__spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid color-mix(in oklch, white 35%, transparent);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: wallet-fund-spin 0.7s linear infinite;
+}
+
+.wallet-fund-card__note {
+  margin: -4px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-3);
+  text-align: center;
+}
+
+@keyframes wallet-fund-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1023px) {
+  .wallet-fund-card__presets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .wallet-fund-card {
+    padding: 16px;
+  }
+
+  .wallet-fund-card__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .wallet-fund-card__header {
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wallet-fund-card__presets {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 380px) {
+  .wallet-fund-card__preset {
+    font-size: 13px;
+    height: 40px;
+  }
+}

@@ -9,7 +9,7 @@ const uploadDir = process.env.UPLOAD_DIR
   ? path.resolve(process.env.UPLOAD_DIR)
   : path.join(__dirname, '../../../uploads');
 
-const subdirs = ['campaigns', 'proofs', 'content', 'avatars', 'logos'];
+const subdirs = ['campaigns', 'proofs', 'content', 'avatars', 'logos', 'reviews'];
 subdirs.forEach((d) => {
   const dir = path.join(uploadDir, d);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });

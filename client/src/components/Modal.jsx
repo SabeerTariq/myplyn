@@ -6,10 +6,10 @@ export default function Modal({ open, onClose, title, children, size = 'md' }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ padding: 16 }}>
       <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={onClose} />
       <div
-        className="relative w-full overflow-auto cc-animate-fade"
+        className="relative w-full overflow-auto cc-animate-fade modal-panel"
         style={{
           maxWidth: sizes[size],
-          maxHeight: '90vh',
+          maxHeight: '90dvh',
           background: 'var(--surface)',
           borderRadius: 14,
           border: '1px solid var(--border)',
@@ -20,7 +20,7 @@ export default function Modal({ open, onClose, title, children, size = 'md' }) {
           <h2 className="section-title">{title}</h2>
           <button type="button" onClick={onClose} style={{ color: 'var(--text-3)', fontSize: 24, lineHeight: 1, background: 'none', border: 'none', cursor: 'pointer' }}>&times;</button>
         </div>
-        <div style={{ padding: '18px 20px' }}>{children}</div>
+        <div className="modal-body">{children}</div>
       </div>
     </div>
   );
@@ -44,10 +44,11 @@ export function Drawer({ open, onClose, title, children }) {
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={onClose} />
       <div
-        className="relative h-full overflow-auto"
+        className="relative h-full overflow-auto drawer-panel"
         style={{
           width: '100%',
           maxWidth: 480,
+          maxHeight: '100dvh',
           background: 'var(--surface)',
           boxShadow: '-20px 0 60px -20px rgba(0,0,0,.3)',
           animation: 'ccslide 0.22s ease',

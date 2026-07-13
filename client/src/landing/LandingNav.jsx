@@ -1,5 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BRAND } from '../config/brand';
+import { useAuth } from '../hooks/useAuth';
+import { getPostLoginPath } from '../utils/authRedirect';
 
 const links = [
   { to: '/', label: 'For Creators' },
@@ -17,6 +19,8 @@ function isActive(pathname, link) {
 export default function LandingNav() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
   const goTop = () => {
     const lenis = window.__landingLenis;
     if (lenis?.scrollTo) {
@@ -26,11 +30,20 @@ export default function LandingNav() {
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
   };
+
   const goHomeTop = (e) => {
     e.preventDefault();
     navigate('/');
     requestAnimationFrame(goTop);
   };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/auth/login');
+    goTop();
+  };
+
+  const dashboardPath = user ? getPostLoginPath(user) : '/auth/login';
 
   return (
     <>
@@ -58,8 +71,17 @@ export default function LandingNav() {
               ))}
             </nav>
             <div className="nav-actions">
-              <Link to="/auth/login" onClick={goTop} className="nav-login">Log in</Link>
-              <Link to="/auth/signup/creator" onClick={goTop} className="btn btn-primary nav-join">Join Now</Link>
+              {user ? (
+                <>
+                  <Link to={dashboardPath} onClick={goTop} className="nav-login">Dashboard</Link>
+                  <button type="button" onClick={handleLogout} className="btn btn-outline nav-join">Log out</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/auth/login" onClick={goTop} className="nav-login">Log in</Link>
+                  <Link to="/auth/signup/creator" onClick={goTop} className="btn btn-primary nav-join">Join Now</Link>
+                </>
+              )}
             </div>
             <button type="button" className="nav-toggle" aria-label="Open menu">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -73,8 +95,17 @@ export default function LandingNav() {
         {links.map((l) => (
           <Link key={`${l.to}-${l.label}`} to={l.to} onClick={l.to === '/' ? goHomeTop : goTop}>{l.label}</Link>
         ))}
-        <Link to="/auth/login" onClick={goTop} className="btn btn-outline btn-block">Log in</Link>
-        <Link to="/auth/signup/creator" onClick={goTop} className="btn btn-primary btn-block">Join Now</Link>
+        {user ? (
+          <>
+            <Link to={dashboardPath} onClick={goTop} className="btn btn-outline btn-block">Dashboard</Link>
+            <button type="button" onClick={handleLogout} className="btn btn-primary btn-block">Log out</button>
+          </>
+        ) : (
+          <>
+            <Link to="/auth/login" onClick={goTop} className="btn btn-outline btn-block">Log in</Link>
+            <Link to="/auth/signup/creator" onClick={goTop} className="btn btn-primary btn-block">Join Now</Link>
+          </>
+        )}
       </div>
     </>
   );

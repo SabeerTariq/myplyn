@@ -1,27 +1,32 @@
 :root {
-  --bg: oklch(0.974 0.006 75);
+  --bg: #f4f9f6;
   --surface: #ffffff;
-  --surface-2: oklch(0.987 0.005 75);
-  --sidebar: oklch(0.996 0.003 75);
-  --border: oklch(0.912 0.006 70);
-  --border-2: oklch(0.86 0.008 70);
-  --text: oklch(0.28 0.014 55);
-  --text-2: oklch(0.5 0.013 58);
-  --text-3: oklch(0.64 0.011 60);
-  --accent: oklch(0.62 0.165 32);
-  --accent-press: oklch(0.55 0.165 32);
-  --accent-soft: oklch(0.955 0.032 45);
-  --accent-text: oklch(0.5 0.15 33);
-  --ok: oklch(0.56 0.11 158);
-  --warn: oklch(0.62 0.12 62);
-  --info: oklch(0.55 0.12 248);
-  --bad: oklch(0.57 0.18 27);
-  --neutral: oklch(0.56 0.012 60);
+  --surface-2: #f8fbf9;
+  --sidebar: #ffffff;
+  --border: #e6edea;
+  --border-2: #d9e3df;
+  --text: #0e2a5e;
+  --text-2: #37485f;
+  --text-3: #71809a;
+  --accent: #1ea24c;
+  --accent-press: #16833d;
+  --accent-soft: #e9f7ee;
+  --accent-text: #16833d;
+  --ok: #1ea24c;
+  --warn: #e6a700;
+  --info: #23509e;
+  --bad: #d64545;
+  --neutral: #9aa5b5;
   --sans: 'Hanken Grotesk', system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
   --ms: 'Material Symbols Rounded Variable', sans-serif;
   --sidebar-width: 262px;
   --sidebar-collapsed: 72px;
+  --dashboard-radius: 18px;
+  --dashboard-radius-sm: 12px;
+  --bp-tablet: 768px;
+  --bp-desktop: 1024px;
+  --bp-wide: 1280px;
 }
 
 @keyframes ccfade {

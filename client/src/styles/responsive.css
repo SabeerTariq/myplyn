@@ -1,0 +1,183 @@
+/* Shared responsive utilities — mobile-first where possible */
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Hide on phone/tablet (< desktop) */
+@media (max-width: 1023px) {
+  .hide-below-desktop {
+    display: none !important;
+  }
+}
+
+/* Hide on desktop */
+@media (min-width: 1024px) {
+  .hide-above-tablet {
+    display: none !important;
+  }
+}
+
+/* Modal + wizard responsive helpers */
+.modal-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-body {
+  padding: 18px 20px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.wizard-footer {
+  display: flex;
+  gap: 12px;
+  position: sticky;
+  bottom: 0;
+  margin-top: 24px;
+  padding-top: 16px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: linear-gradient(180deg, transparent, var(--surface) 24%);
+  z-index: 2;
+}
+
+@media (max-width: 767px) {
+  .wizard-footer {
+    flex-direction: column;
+  }
+
+  .wizard-footer .btn-primary,
+  .wizard-footer .btn-ghost {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+}
+
+.invitation-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 640px) {
+  .invitation-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.invitation-card__actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .invitation-card__actions {
+    width: auto;
+    flex: none;
+  }
+}
+
+.invitation-card__actions .btn-primary,
+.invitation-card__actions .btn-ghost {
+  flex: 1;
+  justify-content: center;
+  min-height: 44px;
+}
+
+@media (min-width: 640px) {
+  .invitation-card__actions .btn-primary,
+  .invitation-card__actions .btn-ghost {
+    flex: none;
+  }
+}
+
+.dashboard-table-cards {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .dashboard-table-cards {
+    display: grid;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .dashboard-table-card-row {
+    display: grid;
+    gap: 6px;
+    width: 100%;
+    text-align: left;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .dashboard-table-card-row:hover {
+    background: var(--surface-2);
+  }
+
+  .dashboard-table-card-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-3);
+  }
+
+  .dashboard-table-card-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .dashboard-table-wrap--with-cards {
+    display: none;
+  }
+}
+
+.workflow-timeline {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.adv-collab-modal-form,
+.cr-collab-modal-form,
+.prop-modal-form {
+  max-height: calc(90dvh - 120px);
+  overflow-y: auto;
+}
+
+@media (max-width: 767px) {
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .stack-mobile {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .stack-mobile > * {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

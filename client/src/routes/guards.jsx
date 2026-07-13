@@ -1,17 +1,28 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { getPostLoginPath } from '../utils/authRedirect';
+
+function AuthLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
+      <div
+        className="animate-spin rounded-full"
+        style={{
+          width: 32,
+          height: 32,
+          border: '4px solid var(--border)',
+          borderTopColor: 'var(--accent)',
+        }}
+      />
+    </div>
+  );
+}
 
 export function ProtectedRoute({ roles, requireOnboarding = true }) {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-t-transparent rounded-full" style={{ borderColor: 'var(--accent)', borderTopColor: 'transparent' }} />
-      </div>
-    );
-  }
+  if (loading) return <AuthLoading />;
 
   if (!user) {
     const isAdmin = roles?.includes('ADMIN');
@@ -19,8 +30,7 @@ export function ProtectedRoute({ roles, requireOnboarding = true }) {
   }
 
   if (roles && !roles.includes(user.role)) {
-    const redirect = user.role === 'ADVERTISER' ? '/advertiser' : user.role === 'CREATOR' ? '/creator' : '/admin';
-    return <Navigate to={redirect} replace />;
+    return <Navigate to={getPostLoginPath(user)} replace />;
   }
 
   if (requireOnboarding && !user.onboardingDone && user.role !== 'ADMIN') {
@@ -35,10 +45,24 @@ export function ProtectedRoute({ roles, requireOnboarding = true }) {
 
 export function GuestRoute() {
   const { user, loading } = useAuth();
-  if (loading) return null;
+
+  if (loading) return <AuthLoading />;
+
   if (user) {
-    const redirect = user.role === 'ADVERTISER' ? '/advertiser' : user.role === 'CREATOR' ? '/creator' : '/admin';
-    return <Navigate to={redirect} replace />;
+    return <Navigate to={getPostLoginPath(user)} replace />;
   }
+
+  return <Outlet />;
+}
+
+export function AdminGuestRoute() {
+  const { user, loading } = useAuth();
+
+  if (loading) return <AuthLoading />;
+
+  if (user) {
+    return <Navigate to={getPostLoginPath(user)} replace />;
+  }
+
   return <Outlet />;
 }

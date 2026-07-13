@@ -176,6 +176,75 @@ export async function sendChatEmail({ userMessage, botReply, page, visitorEmail,
   return true;
 }
 
+function buildOtpEmailHtml({ code }) {
+  const safeCode = escapeHtml(code);
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify your email</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f7fb;font-family:Arial,Helvetica,sans-serif;color:#37485f;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f7fb;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;background:#ffffff;border-radius:20px;overflow:hidden;border:1px solid #e6edea;box-shadow:0 14px 40px rgba(14,42,94,0.10);">
+          <tr>
+            <td style="background:linear-gradient(120deg,#0e2a5e 0%,#14357c 42%,#1ea24c 100%);padding:28px 32px;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#8cf0ac;margin-bottom:10px;">Myplyn</div>
+              <h1 style="margin:0;font-size:26px;line-height:1.2;font-weight:800;color:#ffffff;">Verify your email</h1>
+              <p style="margin:10px 0 0;font-size:15px;line-height:1.6;color:#dbe7ff;">Use this code to finish creating your account.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px;text-align:center;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#1ea24c;margin-bottom:12px;">Your verification code</div>
+              <div style="display:inline-block;padding:18px 28px;background:#f8fbf9;border:1px solid #e6edea;border-radius:16px;font-size:34px;font-weight:800;letter-spacing:0.35em;color:#0e2a5e;">${safeCode}</div>
+              <p style="margin:20px 0 0;font-size:14px;line-height:1.7;color:#71809a;">This code expires in 10 minutes. If you didn&apos;t request it, you can ignore this email.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+export async function sendOtpEmail({ email, code }) {
+  const transport = getTransporter();
+  const from = process.env.EMAIL_FROM || `Myplyn <${process.env.SMTP_USER || 'info@myplyn.com'}>`;
+
+  if (!transport) {
+    console.warn('[mail] SMTP not configured. Signup OTP for', email, ':', code);
+    if (process.env.NODE_ENV === 'production') {
+      const err = new Error('Email service is not configured on the server');
+      err.status = 503;
+      throw err;
+    }
+    return false;
+  }
+
+  await transport.sendMail({
+    from,
+    to: email,
+    subject: 'Myplyn — Your verification code',
+    html: buildOtpEmailHtml({ code }),
+    text: [
+      'Verify your Myplyn account',
+      '',
+      `Your verification code: ${code}`,
+      '',
+      'This code expires in 10 minutes.',
+      'If you did not request this, you can ignore this email.',
+    ].join('\n'),
+  });
+
+  return true;
+}
+
 export async function sendLeadEmail({ fullName, phone, source, subject }) {
   const transport = getTransporter();
   const to = process.env.LEAD_EMAIL || 'info@myplyn.com';

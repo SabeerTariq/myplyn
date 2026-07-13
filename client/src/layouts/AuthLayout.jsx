@@ -1,45 +1,182 @@
 import { Link } from 'react-router-dom';
 import BrandMark from '../components/BrandMark';
+import Icon from '../components/Icon';
+import '../styles/auth.css';
 
-export function AuthHeader({ active }) {
+const FEATURES = [
+  { icon: 'verified_user', title: 'Secure & Trusted', text: 'Your data and earnings are protected at every step.' },
+  { icon: 'bolt', title: 'Smart Connections', text: 'Get matched with the right brands or creators instantly.' },
+  { icon: 'check_circle', title: 'Real Results', text: 'Track performance and payouts in one place.' },
+];
+
+function DashboardMockup() {
   return (
-    <header style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
-      <div className="max-w-6xl mx-auto flex items-center justify-between" style={{ padding: '16px 24px' }}>
-        <Link to="/" className="flex items-center gap-[11px]">
-          <BrandMark size={40} />
-        </Link>
-        <nav className="hidden sm:flex items-center gap-5" style={{ fontSize: 14, color: 'var(--text-2)' }}>
-          <Link to="/how-it-works" className="hover:text-[var(--accent-text)]">How it works</Link>
-          <Link to="/pricing" className="hover:text-[var(--accent-text)]">Pricing</Link>
-        </nav>
-        <div className="flex items-center gap-3">
-          <Link
-            to="/auth/login"
-            className="btn-ghost text-sm"
-            style={active === 'login' ? { color: 'var(--accent-text)', fontWeight: 600 } : undefined}
-          >
-            Log in
-          </Link>
-          <Link
-            to="/auth/signup"
-            className="btn-primary text-sm"
-            style={active === 'signup' ? { filter: 'brightness(1.05)' } : undefined}
-          >
-            Sign up
-          </Link>
+    <div className="auth-mockup">
+      <span className="auth-float-icon auth-float-icon--chart" aria-hidden="true">📈</span>
+      <span className="auth-float-icon auth-float-icon--people" aria-hidden="true">👥</span>
+      <span className="auth-float-icon auth-float-icon--money" aria-hidden="true">💰</span>
+      <div className="auth-mockup-card">
+        <div className="auth-mockup-top">
+          <span className="auth-mockup-dot" />
+          <span className="auth-mockup-dot" />
+          <span className="auth-mockup-dot" />
+        </div>
+        <div className="auth-mockup-body">
+          <div className="auth-mockup-sidebar">
+            <span className="auth-mockup-nav active" />
+            <span className="auth-mockup-nav" />
+            <span className="auth-mockup-nav" />
+            <span className="auth-mockup-nav" />
+          </div>
+          <div className="auth-mockup-chart">
+            <h3>Performance Overview</h3>
+            <svg viewBox="0 0 240 72" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="authChartFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#33C15E" stopOpacity="0.35" />
+                  <stop offset="1" stopColor="#33C15E" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <path d="M0 58 C24 52 40 36 64 40 C88 44 104 18 128 24 C152 30 176 10 240 12 L240 72 L0 72 Z" fill="url(#authChartFill)" />
+              <path d="M0 58 C24 52 40 36 64 40 C88 44 104 18 128 24 C152 30 176 10 240 12" fill="none" stroke="#1EA24C" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+          </div>
         </div>
       </div>
-    </header>
-  );
-}
-
-export default function AuthLayout({ children, active }) {
-  return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
-      <AuthHeader active={active} />
-      <main className="flex-1 flex items-center justify-center cc-animate-fade" style={{ padding: '40px 24px' }}>
-        {children}
-      </main>
     </div>
   );
 }
+
+function MarketingFeatures() {
+  return (
+    <div className="auth-features">
+      {FEATURES.map((item) => (
+        <div key={item.title} className="auth-feature">
+          <span className="auth-feature-icon"><Icon name={item.icon} size={18} /></span>
+          <div>
+            <strong>{item.title}</strong>
+            <span>{item.text}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const MARKETING = {
+  'creator-signup': {
+    title: <>Start earning from your <em>social media pages</em></>,
+    lead: 'Connect your pages, receive brand offers, and get paid for the audience you already built.',
+  },
+  'advertiser-signup': {
+    title: <>Grow your business with <em>social media creators</em></>,
+    lead: 'Create campaigns, discover creators, and launch promotions that actually go live.',
+  },
+  'creator-login': {
+    title: <>Welcome back, <em>creator!</em></>,
+    lead: 'Log in to manage your pages, review brand offers, and track your earnings.',
+  },
+  'advertiser-login': {
+    title: <>Welcome back, <em>partner!</em></>,
+    lead: 'Log in to manage campaigns, discover creators, and grow your business.',
+  },
+  login: {
+    title: <>Welcome <em>back!</em></>,
+    lead: 'Log in to your account and continue growing with Myplyn.',
+  },
+  signup: {
+    title: <>Join the <em>creator economy</em></>,
+    lead: 'Whether you run campaigns or create content, Myplyn connects brands and creators in one place.',
+  },
+};
+
+export function AuthMarketing({ variant = 'login' }) {
+  const content = MARKETING[variant] || MARKETING.login;
+
+  return (
+    <div className="auth-marketing">
+      <h1>{content.title}</h1>
+      <p className="auth-marketing-lead">{content.lead}</p>
+      <DashboardMockup />
+      <MarketingFeatures />
+    </div>
+  );
+}
+
+export function AuthPageShell({ variant = 'login', children }) {
+  return (
+    <div className="auth-page cc-animate-fade">
+      <Link to="/" className="auth-page-logo">
+        <BrandMark size={48} />
+      </Link>
+
+      <div className="auth-shell">
+        <AuthMarketing variant={variant} />
+        <div className="auth-form-panel">{children}</div>
+      </div>
+
+      <footer className="auth-page-footer">
+        <p>
+          By continuing, you agree to our <Link to="/terms">Terms of Service</Link> and <Link to="/privacy">Privacy Policy</Link>.
+        </p>
+        <p>© {new Date().getFullYear()} Myplyn. All rights reserved.</p>
+      </footer>
+    </div>
+  );
+}
+
+export function AuthSocialButtons({ onSignup }) {
+  const social = [
+    { label: 'Continue with Google', className: '', icon: 'https://www.google.com/favicon.ico' },
+    { label: 'Continue with Facebook', className: 'auth-social-btn--facebook', icon: null, letter: 'f' },
+    { label: 'Continue with Apple', className: '', icon: 'apple', isIcon: true },
+    { label: 'Continue with Email', className: '', icon: 'mail', isIcon: true },
+  ];
+
+  return (
+    <div className="auth-social-stack">
+      {social.map((item) => (
+        <button
+          key={item.label}
+          type="button"
+          className={`auth-social-btn ${item.className}`.trim()}
+          onClick={onSignup}
+        >
+          {item.icon && !item.isIcon ? <img src={item.icon} alt="" /> : null}
+          {item.isIcon ? <Icon name={item.icon} size={18} /> : null}
+          {!item.icon && item.letter ? <span>{item.letter}</span> : null}
+          {item.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function CreatorSocialButtons({ onSignup }) {
+  const items = [
+    { label: 'Continue with Facebook', className: 'auth-social-btn--facebook', text: 'f' },
+    { label: 'Continue with Instagram', className: 'auth-social-btn--instagram', text: '◎' },
+    { label: 'Continue with TikTok', className: 'auth-social-btn--tiktok', text: '♪' },
+    { label: 'Continue with YouTube', className: 'auth-social-btn--youtube', text: '▶' },
+    { label: 'Continue with X', className: 'auth-social-btn--x', text: 'X' },
+    { label: 'Continue with LinkedIn', className: 'auth-social-btn--linkedin', text: 'in' },
+    { label: 'Continue with Email', className: '', icon: 'mail', isIcon: true },
+  ];
+
+  return (
+    <div className="auth-social-stack">
+      {items.map((item) => (
+        <button key={item.label} type="button" className={`auth-social-btn ${item.className}`} onClick={onSignup}>
+          {item.isIcon ? <Icon name={item.icon} size={18} /> : <span>{item.text}</span>}
+          {item.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function AuthDivider() {
+  return <div className="auth-divider">or</div>;
+}
+
+export default AuthPageShell;

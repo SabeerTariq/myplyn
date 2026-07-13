@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './hooks/useAuth';
-import { ProtectedRoute, GuestRoute } from './routes/guards';
+import { ProtectedRoute, GuestRoute, AdminGuestRoute } from './routes/guards';
 import LandingLayout from './landing/LandingLayout';
 import LandingHome from './landing/pages/LandingHome';
 import LandingHowItWorks from './landing/pages/LandingHowItWorks';
@@ -15,14 +15,15 @@ import { AdvertiserOnboarding, CreatorOnboarding } from './pages/onboarding/Onbo
 import { AdvertiserDashboard, AdvertiserCampaignsList } from './pages/advertiser/AdvertiserDashboard';
 import {
   CampaignWizard, CampaignDetail, AdvertiserCollaborationsList, AdvertiserCollaborationDetail,
+  AdvertiserProposalsList, AdvertiserProposalDetail,
   AdvertiserMarketplace, AdvertiserWallet, AdvertiserSettings, AdvertiserHelp,
 } from './pages/advertiser/AdvertiserPages';
 import { AdvertiserMessagesInbox } from './pages/messages/MessagesPages';
 
 import {
-  CreatorDashboard, CreatorPagesList, CreatorPageForm, CreatorPageDetail,
+  CreatorDashboard, CreatorPagesList, CreatorPageForm, CreatorPageEdit, CreatorPageDetail,
   CreatorDiscover, CreatorInvitations, CreatorCollaborationsList, CreatorCollaborationDetail,
-  CreatorEarnings, CreatorSettings, CreatorHelp, CreatorApplications,
+  CreatorEarnings, CreatorSettings, CreatorHelp, CreatorApplications, CreatorProposalDetailPage,
 } from './pages/creator/CreatorPages';
 import { CreatorMessagesInbox } from './pages/messages/MessagesPages';
 
@@ -59,11 +60,15 @@ export default function App() {
               <Route path="auth/signup/advertiser" element={<SignupFormPage role="advertiser" />} />
               <Route path="auth/signup/creator" element={<SignupFormPage role="creator" />} />
               <Route path="auth/login" element={<LoginPage />} />
+              <Route path="auth/login/creator" element={<LoginPage role="creator" />} />
+              <Route path="auth/login/advertiser" element={<LoginPage role="advertiser" />} />
               <Route path="auth/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="auth/reset-password" element={<ResetPasswordPage />} />
             </Route>
 
-            <Route path="admin/login" element={<LoginPage admin />} />
+            <Route element={<AdminGuestRoute />}>
+              <Route path="admin/login" element={<LoginPage admin />} />
+            </Route>
 
             {/* Advertiser */}
             <Route element={<ProtectedRoute roles={['ADVERTISER']} requireOnboarding={false} />}>
@@ -78,6 +83,8 @@ export default function App() {
               <Route path="advertiser/marketplace" element={<AdvertiserMarketplace />} />
               <Route path="advertiser/collaborations" element={<AdvertiserCollaborationsList />} />
               <Route path="advertiser/collaborations/:id" element={<AdvertiserCollaborationDetail />} />
+              <Route path="advertiser/proposals" element={<AdvertiserProposalsList />} />
+              <Route path="advertiser/proposals/:id" element={<AdvertiserProposalDetail />} />
               <Route path="advertiser/wallet" element={<AdvertiserWallet />} />
               <Route path="advertiser/messages" element={<AdvertiserMessagesInbox />} />
               <Route path="advertiser/messages/:threadId" element={<AdvertiserMessagesInbox />} />
@@ -93,9 +100,13 @@ export default function App() {
               <Route path="creator" element={<CreatorDashboard />} />
               <Route path="creator/pages" element={<CreatorPagesList />} />
               <Route path="creator/pages/new" element={<CreatorPageForm />} />
+              <Route path="creator/pages/:id/edit" element={<CreatorPageEdit />} />
               <Route path="creator/pages/:id" element={<CreatorPageDetail />} />
-              <Route path="creator/discover" element={<CreatorDiscover />} />
-              <Route path="creator/applications" element={<CreatorApplications />} />
+              <Route path="creator/marketplace" element={<CreatorDiscover />} />
+              <Route path="creator/discover" element={<Navigate to="/creator/marketplace" replace />} />
+              <Route path="creator/applications" element={<Navigate to="/creator/proposals" replace />} />
+              <Route path="creator/proposals" element={<CreatorApplications />} />
+              <Route path="creator/proposals/:id" element={<CreatorProposalDetailPage />} />
               <Route path="creator/invitations" element={<CreatorInvitations />} />
               <Route path="creator/collaborations" element={<CreatorCollaborationsList />} />
               <Route path="creator/collaborations/:id" element={<CreatorCollaborationDetail />} />

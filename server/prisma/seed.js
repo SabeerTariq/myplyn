@@ -30,7 +30,7 @@ async function main() {
 
   const niches = [
     'Fashion', 'Beauty', 'Tech', 'Food', 'Travel', 'Fitness',
-    'Gaming', 'Lifestyle', 'Finance', 'Education',
+    'Gaming', 'Lifestyle', 'Finance', 'Education', 'Others',
   ];
   for (const name of niches) {
     await prisma.niche.upsert({

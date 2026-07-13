@@ -7,6 +7,8 @@ import { signToken, setAuthCookie, clearAuthCookie } from '../lib/jwt.js';
 import { authenticate } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/error.js';
 import { getOrCreateWallet } from '../services/walletService.js';
+import { issueOtp, verifyOtp } from '../services/otpService.js';
+import { sendOtpEmail } from '../services/mailService.js';
 
 const router = Router();
 
@@ -25,10 +27,23 @@ function formatUser(user) {
   };
 }
 
+router.post('/signup/send-otp', asyncHandler(async (req, res) => {
+  const { email } = z.object({ email: z.string().email() }).parse(req.body);
+
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) return res.status(409).json({ error: 'Email already registered' });
+
+  const code = issueOtp(email, 'signup');
+  await sendOtpEmail({ email, code });
+
+  res.json({ message: 'Verification code sent' });
+}));
+
 router.post('/signup', asyncHandler(async (req, res) => {
   const schema = z.object({
     email: z.string().email(),
     password: z.string().min(8),
+    otp: z.string().length(6),
     role: z.enum(['ADVERTISER', 'CREATOR']),
     companyName: z.string().optional(),
     country: z.string().optional(),
@@ -39,8 +54,11 @@ router.post('/signup', asyncHandler(async (req, res) => {
   const existing = await prisma.user.findUnique({ where: { email: data.email } });
   if (existing) return res.status(409).json({ error: 'Email already registered' });
 
+  if (!verifyOtp(data.email, data.otp, 'signup')) {
+    return res.status(400).json({ error: 'Invalid or expired verification code' });
+  }
+
   const passwordHash = await hashPassword(data.password);
-  const verifyToken = uuidv4();
 
   const user = await prisma.user.create({
     data: {
@@ -49,7 +67,7 @@ router.post('/signup', asyncHandler(async (req, res) => {
       role: data.role,
       status: 'ACTIVE',
       emailVerifiedAt: new Date(),
-      verifyToken,
+      verifyToken: null,
       ...(data.role === 'ADVERTISER' && {
         advertiserProfile: {
           create: { companyName: data.companyName || data.email.split('@')[0] },

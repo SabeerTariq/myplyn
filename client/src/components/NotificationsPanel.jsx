@@ -1,10 +1,31 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationsApi } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 import Icon from './Icon';
+
+function notificationPath(n, role) {
+  const payload = n.payload || {};
+  const messagesBase = role === 'ADVERTISER'
+    ? '/advertiser/messages'
+    : role === 'CREATOR'
+      ? '/creator/messages'
+      : '/admin/messages';
+
+  if (payload.threadId) return `${messagesBase}/${payload.threadId}`;
+  if (payload.collaborationId) {
+    if (role === 'ADVERTISER') return `/advertiser/collaborations/${payload.collaborationId}`;
+    if (role === 'CREATOR') return `/creator/collaborations/${payload.collaborationId}`;
+  }
+  if (payload.type === 'message' && payload.threadId) return `${messagesBase}/${payload.threadId}`;
+  return null;
+}
 
 export default function NotificationsPanel() {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const qc = useQueryClient();
 
   const { data: counts } = useQuery({
@@ -70,10 +91,11 @@ export default function NotificationsPanel() {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div
-            className="absolute right-0 z-50 overflow-auto"
+            className="notifications-dropdown absolute right-0 z-50 overflow-auto"
             style={{
               top: 'calc(100% + 8px)',
               width: 320,
+              maxWidth: 'calc(100vw - 24px)',
               maxHeight: 384,
               background: 'var(--surface)',
               border: '1px solid var(--border)',
@@ -87,21 +109,32 @@ export default function NotificationsPanel() {
                 Mark all read
               </button>
             </div>
-            {data?.length ? data.map((n) => (
-              <div
+            {data?.length ? data.map((n) => {
+              const path = notificationPath(n, user?.role);
+              return (
+              <button
                 key={n.id}
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  if (path) navigate(path);
+                }}
+                className="block w-full text-left"
                 style={{
                   padding: '14px 16px',
                   borderBottom: '1px solid var(--border)',
                   fontSize: 13,
                   opacity: n.readAt ? 0.6 : 1,
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: path ? 'pointer' : 'default',
                 }}
               >
                 <p className="font-bold">{n.title}</p>
                 {n.body && <p style={{ color: 'var(--text-3)', marginTop: 2 }}>{n.body}</p>}
                 <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 4 }}>{new Date(n.createdAt).toLocaleString()}</p>
-              </div>
-            )) : (
+              </button>
+            );}) : (
               <p style={{ padding: 16, color: 'var(--text-3)', fontSize: 13 }}>No notifications</p>
             )}
           </div>

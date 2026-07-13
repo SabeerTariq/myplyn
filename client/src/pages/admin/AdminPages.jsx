@@ -30,9 +30,9 @@ export function AdminDashboard() {
 
   return (
     <AdminLayout breadcrumbs={[{ label: 'Dashboard' }]}>
-      <PageHeader title="Platform Overview" />
+      <PageHeader title="Platform Overview" lead="Monitor platform health, queues, and financial activity." />
       {isLoading ? <p>Loading...</p> : (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div className="dashboard-summary-grid dashboard-summary-grid--3" style={{ marginTop: 0 }}>
           <KpiCard title="Advertisers" value={kpis?.totalAdvertisers} />
           <KpiCard title="Creators" value={kpis?.totalCreators} />
           <KpiCard title="Active Campaigns" value={kpis?.activeCampaigns} />
@@ -237,30 +237,40 @@ export function AdminCampaignDetail() {
 export function AdminReviewQueue() {
   const [tab, setTab] = useState('all');
   const [selected, setSelected] = useState(null);
+  const [notes, setNotes] = useState('');
   const qc = useQueryClient();
 
   const { data } = useQuery({ queryKey: ['review-queue'], queryFn: () => adminApi.reviewQueue().then((r) => r.data) });
 
   const items = data?.items?.filter((i) => tab === 'all' || i.type.toLowerCase() === tab) || [];
 
-  const resolve = async (action, notes) => {
-    await adminApi.resolveReview(selected.id, { action, notes });
+  const resolve = async (action, resolveNotes) => {
+    await adminApi.resolveReview(selected.id, { action, notes: resolveNotes });
     qc.invalidateQueries(['review-queue']);
     setSelected(null);
+    setNotes('');
   };
 
-  const verifyPage = async (status) => {
-    if (selected?.page) {
-      await adminApi.verifyPage(selected.page.id, { status, notes: 'Admin verification' });
-      await adminApi.resolveReview(selected.id, { action: 'verify' });
-      qc.invalidateQueries(['review-queue']);
-      setSelected(null);
-    }
+  const reviewPage = async (status) => {
+    if (!selected?.page) return;
+    await adminApi.verifyPage(selected.page.id, { status, notes: notes.trim() || undefined });
+    await adminApi.resolveReview(selected.id, {
+      action: status === 'VERIFIED' ? 'verify' : 'reject',
+      notes: notes.trim() || undefined,
+    });
+    qc.invalidateQueries(['review-queue']);
+    setSelected(null);
+    setNotes('');
+  };
+
+  const openItem = (item) => {
+    setSelected(item);
+    setNotes('');
   };
 
   return (
     <AdminLayout breadcrumbs={[{ label: 'Review Queue' }]}>
-      <PageHeader title="Review Queue" />
+      <PageHeader title="Review Queue" lead="Verify creator pages, resolve disputes, and handle reports." />
       <TabBar
         tabs={[
           { key: 'all', label: 'All' },
@@ -273,24 +283,48 @@ export function AdminReviewQueue() {
       />
       <div className="card space-y-3">
         {items.length ? items.map((item) => (
-          <div key={item.id} className="flex justify-between items-center p-3 border rounded-lg cursor-pointer hover:bg-[var(--surface-2)]" onClick={() => setSelected(item)}>
+          <div key={item.id} className="flex justify-between items-center p-3 border rounded-lg cursor-pointer hover:bg-[var(--surface-2)]" onClick={() => openItem(item)}>
             <div>
-              <p className="font-medium">{item.type}</p>
-              <p className="text-sm text-muted">{item.page?.name || item.dispute?.reason || item.report?.reason || item.entityId}</p>
+              <p className="font-medium">{item.type === 'PROOF' ? 'Page verification' : item.type}</p>
+              <p className="text-sm text-muted">
+                {item.page?.name || item.dispute?.reason || item.report?.reason || item.entityId}
+                {item.page?.platform?.name ? ` · ${item.page.platform.name}` : ''}
+              </p>
             </div>
             <span className="text-xs font-bold px-2 py-1 rounded" style={{ background: 'color-mix(in oklch, var(--warn) 15%, white)', color: 'var(--warn)' }}>{item.status}</span>
           </div>
         )) : <p className="text-muted">Queue empty</p>}
       </div>
 
-      <Modal open={!!selected} onClose={() => setSelected(null)} title="Review item">
+      <Modal open={!!selected} onClose={() => { setSelected(null); setNotes(''); }} title={selected?.type === 'PROOF' ? 'Verify creator page' : 'Review item'}>
         {selected?.type === 'PROOF' && selected.page && (
           <div className="space-y-4">
-            <p><strong>{selected.page.name}</strong> — {selected.page.followers?.toLocaleString()} followers</p>
-            <p className="text-sm">{selected.page.url}</p>
+            <dl className="cr-verify-panel">
+              <div className="cr-verify-row"><dt>Page</dt><dd><strong>{selected.page.name}</strong></dd></div>
+              <div className="cr-verify-row"><dt>Creator</dt><dd>{selected.page.creator?.user?.email || '—'}</dd></div>
+              <div className="cr-verify-row"><dt>Platform</dt><dd>{selected.page.platform?.name}</dd></div>
+              <div className="cr-verify-row"><dt>Niche</dt><dd>{selected.page.niche?.slug === 'others' && selected.page.customNiche ? selected.page.customNiche : (selected.page.niche?.name || selected.page.customNiche || '—')}</dd></div>
+              <div className="cr-verify-row"><dt>Location</dt><dd>{[selected.page.city, selected.page.state, selected.page.country].filter(Boolean).join(', ') || '—'}</dd></div>
+              <div className="cr-verify-row"><dt>Followers</dt><dd>{selected.page.followers?.toLocaleString()}</dd></div>
+              <div className="cr-verify-row"><dt>Avg reach</dt><dd>{selected.page.avgReach?.toLocaleString()}</dd></div>
+              <div className="cr-verify-row"><dt>Engagement</dt><dd>{selected.page.engagement != null ? `${selected.page.engagement}%` : '—'}</dd></div>
+              <div className="cr-verify-row"><dt>URL</dt><dd><a href={selected.page.url} target="_blank" rel="noreferrer" className="text-accent-link">{selected.page.url}</a></dd></div>
+            </dl>
+
+            <div>
+              <label className="label">Admin notes (optional)</label>
+              <textarea
+                className="input"
+                rows={3}
+                placeholder="Reason for rejection or notes for the creator"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+            </div>
+
             <div className="flex gap-2">
-              <button className="btn-primary" onClick={() => verifyPage('VERIFIED')}>Verify stats</button>
-              <button className="btn-danger" onClick={() => verifyPage('REJECTED')}>Reject</button>
+              <button type="button" className="btn-primary" onClick={() => reviewPage('VERIFIED')}>Approve page</button>
+              <button type="button" className="btn-danger" onClick={() => reviewPage('REJECTED')}>Reject page</button>
             </div>
           </div>
         )}

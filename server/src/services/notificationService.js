@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma.js';
+import { getUnreadMessageCount } from './messageService.js';
 
 export async function createNotification(userId, type, title, body, payload = {}) {
   return prisma.notification.create({
@@ -65,23 +66,4 @@ export async function getBadgeCounts(userId, role) {
   counts.messages = await getUnreadMessageCount(userId, role);
 
   return counts;
-}
-
-async function getUnreadMessageCount(userId, role) {
-  let accessWhere = { id: '__none__' };
-  if (role === 'ADMIN') {
-    accessWhere = {};
-  } else if (role === 'CREATOR') {
-    accessWhere = { collaboration: { creatorUserId: userId } };
-  } else if (role === 'ADVERTISER') {
-    const adv = await prisma.advertiserProfile.findUnique({ where: { userId } });
-    if (adv) accessWhere = { collaboration: { campaign: { advertiserId: adv.id } } };
-  }
-
-  return prisma.messageThread.count({
-    where: {
-      ...accessWhere,
-      messages: { some: { readAt: null, senderId: { not: userId } } },
-    },
-  });
 }

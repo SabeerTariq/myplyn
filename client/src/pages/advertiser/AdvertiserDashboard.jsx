@@ -8,7 +8,6 @@ import StatusPill from '../../components/StatusPill';
 import Icon from '../../components/Icon';
 import PageHeader from '../../components/PageHeader';
 import { campaignsApi, collaborationsApi } from '../../services/api';
-import { useAuth } from '../../hooks/useAuth';
 
 function AdvertiserLayout({ breadcrumbs, children, banner }) {
   return (
@@ -19,8 +18,6 @@ function AdvertiserLayout({ breadcrumbs, children, banner }) {
 }
 
 export function AdvertiserDashboard() {
-  const { user } = useAuth();
-  const name = user?.advertiserProfile?.companyName?.split(' ')[0] || 'there';
   const { data: campaigns } = useQuery({ queryKey: ['adv-campaigns'], queryFn: () => campaignsApi.list().then((r) => r.data) });
   const { data: collabs } = useQuery({ queryKey: ['adv-collabs'], queryFn: () => collaborationsApi.list().then((r) => r.data) });
 
@@ -44,8 +41,8 @@ export function AdvertiserDashboard() {
   return (
     <AdvertiserLayout breadcrumbs={[{ label: 'Dashboard' }]}>
       <PageHeader
-        greeting={`Good morning, ${name}`}
         title="Dashboard"
+        lead="Monitor campaigns, collaborations, and wallet activity."
         actions={
           <>
             <button type="button" className="btn-ghost"><Icon name="calendar_today" size={18} />Last 30 days<Icon name="expand_more" size={18} /></button>
@@ -54,11 +51,13 @@ export function AdvertiserDashboard() {
         }
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-5" style={{ gap: 13, marginBottom: 16 }}>
+      <div className="dashboard-summary-grid">
         <KpiCard title="Active Campaigns" value={active} icon="campaign" iconColor="var(--accent)" delta="↑ 2 this month" deltaColor="var(--ok)" />
         <KpiCard title="Funds in Holding" value="$2,500" icon="lock" iconColor="var(--warn)" />
         <KpiCard title="Total Spent" value="$850" icon="payments" iconColor="var(--text-3)" delta="↑ 12% vs last month" deltaColor="var(--ok)" />
-        <KpiCard title="Pending Applications" value={pendingApps} icon="inbox" iconColor="var(--info)" />
+        <Link to="/advertiser/proposals?tab=pending" className="block no-underline text-inherit">
+          <KpiCard title="Pending Applications" value={pendingApps} icon="inbox" iconColor="var(--info)" />
+        </Link>
         <KpiCard title="Live Collaborations" value={liveCollabs} icon="handshake" iconColor="var(--ok)" />
       </div>
 

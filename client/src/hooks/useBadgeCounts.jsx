@@ -5,6 +5,8 @@ export function useBadgeCounts() {
   return useQuery({
     queryKey: ['badgeCounts'],
     queryFn: () => notificationsApi.counts().then((r) => r.data.counts),
-    refetchInterval: 30000,
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true,
+    staleTime: 3000,
   });
 }

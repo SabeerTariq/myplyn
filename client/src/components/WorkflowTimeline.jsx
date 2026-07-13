@@ -9,36 +9,47 @@ export default function WorkflowTimeline({ events = [], currentStatus }) {
   const currentIdx = statuses.indexOf(currentStatus);
 
   return (
-    <div>
+    <div className="workflow-timeline">
       {statuses.map((status, idx) => {
         const done = idx <= currentIdx;
         const active = status === currentStatus;
         const event = events.find((e) => e.toStatus === status);
         const config = COLLAB_STATUS_LABELS[status] || { label: status };
 
+        const isLast = idx === statuses.length - 1;
+
         return (
-          <div key={status} style={{ display: 'flex', gap: 12 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div
+            key={status}
+            style={{
+              display: 'flex',
+              gap: 12,
+              minHeight: isLast ? 'auto' : 44,
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 'none' }}>
               <div
                 style={{
                   width: 12,
                   height: 12,
                   borderRadius: '50%',
+                  flex: 'none',
                   background: done ? 'var(--accent)' : 'var(--border)',
                   boxShadow: active ? '0 0 0 4px color-mix(in oklch, var(--accent) 20%, transparent)' : 'none',
                 }}
               />
-              {idx < statuses.length - 1 && (
+              {!isLast && (
                 <div
                   style={{
                     width: 2,
-                    height: 32,
-                    background: done && idx < currentIdx ? 'var(--accent)' : 'var(--border)',
+                    flex: 1,
+                    minHeight: 20,
+                    background: idx < currentIdx ? 'var(--accent)' : 'var(--border)',
                   }}
                 />
               )}
             </div>
-            <div style={{ paddingBottom: 24 }}>
+            <div style={{ paddingBottom: isLast ? 0 : 20, marginTop: -2 }}>
               <p style={{ fontSize: 13, fontWeight: 600, color: done ? 'var(--text)' : 'var(--text-3)' }}>{config.label}</p>
               {event && (
                 <p className="text-muted" style={{ fontSize: 11.5, marginTop: 2 }}>

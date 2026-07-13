@@ -1,7 +1,18 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { BRAND, brandEmail } from '../../config/brand';
 
+const CONTACT_ROLE_ROUTES = {
+  'Brand / advertiser': '/auth/signup/advertiser',
+  'Creator / page owner': '/auth/signup/creator',
+};
+
 export default function LandingContact() {
+  const navigate = useNavigate();
+
+  const handleRoleChange = (event) => {
+    const route = CONTACT_ROLE_ROUTES[event.target.value];
+    if (route) navigate(route);
+  };
   return (
     <>
       <section className="page-hero" style={{ paddingBottom: '30px' }}>
@@ -24,7 +35,13 @@ export default function LandingContact() {
               <div className="two">
                 <div className="field"><label htmlFor="em">Email</label><input id="em" type="email" placeholder="you@email.com" /></div>
                 <div className="field"><label htmlFor="role">I'm a…</label>
-                  <select id="role"><option>Brand / advertiser</option><option>Creator / page owner</option><option>Press / partnership</option><option>Something else</option></select>
+                  <select id="role" defaultValue="" onChange={handleRoleChange}>
+                    <option value="" disabled>Select an option</option>
+                    <option>Brand / advertiser</option>
+                    <option>Creator / page owner</option>
+                    <option>Press / partnership</option>
+                    <option>Something else</option>
+                  </select>
                 </div>
               </div>
               <div className="field"><label htmlFor="sub">Subject</label><input id="sub" type="text" placeholder="How can we help?" /></div>

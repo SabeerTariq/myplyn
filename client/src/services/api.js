@@ -42,6 +42,7 @@ api.interceptors.response.use(
 export default api;
 
 export const authApi = {
+  sendSignupOtp: (email) => api.post('/auth/signup/send-otp', { email }),
   signup: (data) => api.post('/auth/signup', data),
   login: (data) => api.post('/auth/login', data),
   adminLogin: (data) => api.post('/auth/admin/login', data),
@@ -67,7 +68,7 @@ export const campaignsApi = {
     return api.post(`/campaigns/${id}/assets`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
   },
   approveApplication: (campaignId, appId) => api.post(`/campaigns/${campaignId}/applications/${appId}/approve`),
-  rejectApplication: (campaignId, appId) => api.post(`/campaigns/${campaignId}/applications/${appId}/reject`),
+  rejectApplication: (campaignId, appId, notes) => api.post(`/campaigns/${campaignId}/applications/${appId}/reject`, { notes }),
 };
 
 export const collaborationsApi = {
@@ -89,12 +90,18 @@ export const collaborationsApi = {
     return api.post(`/collaborations/${id}/proof`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
   },
   verify: (id) => api.post(`/collaborations/${id}/verify`),
-  requestChanges: (id, notes) => api.post(`/collaborations/${id}/request-changes`, { notes }),
+  requestChanges: (id, notes, file) => {
+    const fd = new FormData();
+    fd.append('notes', notes);
+    if (file) fd.append('file', file);
+    return api.post(`/collaborations/${id}/request-changes`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
   dispute: (id, data) => api.post(`/collaborations/${id}/dispute`, data),
 };
 
 export const marketplaceApi = {
   campaigns: (params) => api.get('/marketplace', { params }),
+  campaign: (id) => api.get(`/marketplace/campaigns/${id}`),
   creators: (params) => api.get('/marketplace/creators', { params }),
   creatorPage: (id) => api.get(`/marketplace/creators/${id}`),
   apply: (data) => api.post('/marketplace/apply', data),
@@ -103,8 +110,12 @@ export const marketplaceApi = {
   acceptInvitation: (id) => api.post(`/marketplace/invitations/${id}/accept`),
   rejectInvitation: (id) => api.post(`/marketplace/invitations/${id}/reject`),
   applications: () => api.get('/marketplace/applications'),
+  application: (id) => api.get(`/marketplace/applications/${id}`),
+  proposals: () => api.get('/marketplace/proposals'),
+  withdrawApplication: (id) => api.delete(`/marketplace/applications/${id}`),
   saved: () => api.get('/marketplace/saved'),
   saveCreator: (creatorUserId) => api.post(`/marketplace/saved/${creatorUserId}`),
+  unsaveCreator: (creatorUserId) => api.delete(`/marketplace/saved/${creatorUserId}`),
 };
 
 export const pagesApi = {
@@ -141,6 +152,9 @@ export const messagesApi = {
 export const taxonomyApi = {
   niches: () => api.get('/taxonomy/niches'),
   platforms: () => api.get('/taxonomy/platforms'),
+  countries: () => api.get('/taxonomy/countries'),
+  states: (country) => api.get('/taxonomy/states', { params: { country } }),
+  cities: (country, state) => api.get('/taxonomy/cities', { params: { country, state } }),
 };
 
 export const adminApi = {

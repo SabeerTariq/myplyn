@@ -1,6 +1,7 @@
 import prisma from '../lib/prisma.js';
 import { holdFunds, releasePayment } from './walletService.js';
 import { createNotification } from './notificationService.js';
+import { ensureThreadForCollaboration } from './messageService.js';
 
 const TRANSITIONS = {
   REQUESTED: ['APPLICATION_PENDING', 'ACCEPTED', 'CANCELLED'],
@@ -18,7 +19,7 @@ const ACTOR_RULES = {
   APPLICATION_PENDING: ['CREATOR'],
   ACCEPTED: ['ADVERTISER', 'CREATOR'],
   CONTENT_PROVIDED: ['ADVERTISER'],
-  PUBLISHED: ['CREATOR'],
+  PUBLISHED: ['CREATOR', 'ADVERTISER', 'ADMIN'],
   PROOF_SUBMITTED: ['CREATOR'],
   IN_REVIEW: ['SYSTEM'],
   VERIFIED: ['ADVERTISER', 'ADMIN'],
@@ -98,13 +99,22 @@ export async function transitionCollaboration(collaborationId, toStatus, actorUs
   };
 
   if (notifyMap[toStatus]) {
+    const meta = { collaborationId };
+    if (toStatus === 'CONTENT_PROVIDED') {
+      const thread = await ensureThreadForCollaboration(collaborationId);
+      meta.threadId = thread.id;
+    }
     await createNotification(
       notifyMap[toStatus].userId,
       'collaboration',
       notifyMap[toStatus].title,
       notes || `Collaboration status: ${toStatus}`,
-      { collaborationId }
+      meta,
     );
+  }
+
+  if (toStatus === 'ACCEPTED') {
+    await ensureThreadForCollaboration(collaborationId);
   }
 
   if (toStatus === 'PROOF_SUBMITTED') {
