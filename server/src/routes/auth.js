@@ -46,8 +46,20 @@ router.post('/signup', asyncHandler(async (req, res) => {
     otp: z.string().length(6),
     role: z.enum(['ADVERTISER', 'CREATOR']),
     companyName: z.string().optional(),
+    website: z.string().optional(),
+    industry: z.string().optional(),
     country: z.string().optional(),
+    city: z.string().optional(),
     niche: z.string().optional(),
+    bio: z.string().optional(),
+    socialLinks: z.object({
+      instagram: z.string().optional(),
+      facebook: z.string().optional(),
+      linkedin: z.string().optional(),
+      tiktok: z.string().optional(),
+      youtube: z.string().optional(),
+      x: z.string().optional(),
+    }).optional(),
   });
   const data = schema.parse(req.body);
 
@@ -59,6 +71,9 @@ router.post('/signup', asyncHandler(async (req, res) => {
   }
 
   const passwordHash = await hashPassword(data.password);
+  const socialLinks = data.socialLinks
+    ? Object.fromEntries(Object.entries(data.socialLinks).filter(([, value]) => value?.trim()))
+    : null;
 
   const user = await prisma.user.create({
     data: {
@@ -70,12 +85,23 @@ router.post('/signup', asyncHandler(async (req, res) => {
       verifyToken: null,
       ...(data.role === 'ADVERTISER' && {
         advertiserProfile: {
-          create: { companyName: data.companyName || data.email.split('@')[0] },
+          create: {
+            companyName: data.companyName || data.email.split('@')[0],
+            website: data.website || null,
+            industry: data.industry || null,
+            country: data.country || null,
+            city: data.city || null,
+            socialLinks: socialLinks && Object.keys(socialLinks).length > 0 ? socialLinks : null,
+          },
         },
       }),
       ...(data.role === 'CREATOR' && {
         creatorProfile: {
-          create: { country: data.country, bio: data.niche ? `Niche: ${data.niche}` : null },
+          create: {
+            country: data.country || null,
+            city: data.city || null,
+            bio: [data.bio?.trim(), data.niche ? `Primary niche: ${data.niche}` : null].filter(Boolean).join('\n\n') || null,
+          },
         },
       }),
     },

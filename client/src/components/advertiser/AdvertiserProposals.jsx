@@ -94,12 +94,12 @@ export default function AdvertiserProposals() {
         <PageHeader
           title="Proposals"
           lead="Review creator applications across all your campaigns."
-          actions={(
-            <>
-              <Link to="/advertiser/marketplace" className="chip-btn">Find creators</Link>
-              <Link to="/advertiser/campaigns/new" className="btn-primary dashboard-pill-btn">Create campaign</Link>
-            </>
-          )}
+        actions={(
+          <>
+            <Link to="/advertiser/marketplace" className="chip-btn">Find creators</Link>
+            <Link to="/advertiser/campaigns/new" className="btn-primary prop-mobile-cta">Create campaign</Link>
+          </>
+        )}
         />
         <EmptyState
           title="No proposals yet"
@@ -107,7 +107,7 @@ export default function AdvertiserProposals() {
           action={(
             <div className="prop-empty-actions">
               <Link to="/advertiser/campaigns" className="chip-btn">View campaigns</Link>
-              <Link to="/advertiser/marketplace" className="btn-primary dashboard-pill-btn">Invite creators</Link>
+              <Link to="/advertiser/marketplace" className="btn-primary prop-mobile-cta">Invite creators</Link>
             </div>
           )}
         />
@@ -123,11 +123,11 @@ export default function AdvertiserProposals() {
         actions={(
           <button
             type="button"
-            className={`chip-btn ${compareMode ? 'is-active' : ''}`}
+            className={`chip-btn prop-compare-toggle ${compareMode ? 'is-active' : ''}`}
             onClick={() => { setCompareMode((v) => !v); setCompareIds([]); }}
           >
             <Icon name="compare" size={16} />
-            {compareMode ? 'Done comparing' : 'Compare'}
+            <span className="prop-compare-toggle__label">{compareMode ? 'Done' : 'Compare'}</span>
           </button>
         )}
       />
@@ -243,7 +243,56 @@ export default function AdvertiserProposals() {
                   <StatusPill status={app.status} label={proposalStatusLabel(app.status)} />
                 </div>
 
-                <div className="prop-card-metrics">
+                <div className="prop-card-bid-row">
+                  <div className="prop-card-bid-main">
+                    <span className="prop-card-bid-label">Bid</span>
+                    <strong>{formatMoney(app.proposedPrice)}</strong>
+                  </div>
+                  {app.campaign?.perPlacement && (
+                    <div className="prop-card-bid-budget">
+                      <span>Budget</span>
+                      <strong>{formatMoney(app.campaign.perPlacement)}</strong>
+                    </div>
+                  )}
+                  {bidDelta && (
+                    <span className={`prop-bid-delta prop-bid-delta--${bidDelta.tone}`}>
+                      {bidDelta.label}
+                    </span>
+                  )}
+                </div>
+
+                <div className="prop-card-kpi-grid">
+                  {app.page?.followers > 0 && (
+                    <div className="prop-card-kpi">
+                      <Icon name="groups" size={16} />
+                      <span>{formatCount(app.page.followers)}</span>
+                      <small>Followers</small>
+                    </div>
+                  )}
+                  {app.page?.engagement > 0 && (
+                    <div className="prop-card-kpi">
+                      <Icon name="trending_up" size={16} />
+                      <span>{Number(app.page.engagement).toFixed(1)}%</span>
+                      <small>Engagement</small>
+                    </div>
+                  )}
+                  {app.page?.platform?.name && (
+                    <div className="prop-card-kpi">
+                      <Icon name="public" size={16} />
+                      <span>{app.page.platform.name}</span>
+                      <small>Platform</small>
+                    </div>
+                  )}
+                  {niche !== '—' && (
+                    <div className="prop-card-kpi">
+                      <Icon name="category" size={16} />
+                      <span>{niche}</span>
+                      <small>Niche</small>
+                    </div>
+                  )}
+                </div>
+
+                <div className="prop-card-metrics prop-card-metrics--legacy">
                   <span className="prop-card-metric">
                     <Icon name="payments" size={14} />
                     Bid {formatMoney(app.proposedPrice)}
@@ -270,12 +319,6 @@ export default function AdvertiserProposals() {
                     <span className="prop-card-metric">{niche}</span>
                   )}
                 </div>
-
-                {bidDelta && (
-                  <span className={`prop-bid-delta prop-bid-delta--${bidDelta.tone}`}>
-                    {bidDelta.label}
-                  </span>
-                )}
 
                 {app.message && (
                   <p className="prop-card-excerpt">{app.message.slice(0, 100)}{app.message.length > 100 ? '…' : ''}</p>

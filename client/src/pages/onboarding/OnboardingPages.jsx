@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { authApi } from '../../services/api';
+import { authApi, pagesApi } from '../../services/api';
 import WizardStepper from '../../components/WizardStepper';
 import BrandMark from '../../components/BrandMark';
+import Icon from '../../components/Icon';
+import CreatorPageFormFields, { buildPageFormState, buildPagePayload } from '../../components/creator/CreatorPageFormFields';
 import { BRAND } from '../../config/brand';
 import '../../styles/onboarding.css';
+import '../../styles/creator-home.css';
 
-const ADV_STEPS = ['Business Profile', 'Payment Method', 'First Campaign'];
-const CRE_STEPS = ['Profile', 'List a Page', 'Connect Payouts'];
+const ADV_STEPS = ['Payment Method', 'First Campaign'];
+const CRE_STEPS = ['List a Page', 'Connect Payouts'];
 
 function OnboardingShell({ children, onSkip }) {
   return (
@@ -19,7 +22,7 @@ function OnboardingShell({ children, onSkip }) {
         </Link>
         {onSkip && (
           <button type="button" className="onboarding-topbar-skip" onClick={onSkip}>
-            Skip for now
+            Skip all
           </button>
         )}
       </header>
@@ -30,76 +33,123 @@ function OnboardingShell({ children, onSkip }) {
   );
 }
 
-function StepFooter({ step, onBack, onContinue, continueLabel = 'Continue', continueOnly = false }) {
+function StepFooter({
+  step,
+  totalSteps,
+  onBack,
+  onContinue,
+  onSkip,
+  continueLabel = 'Continue',
+  loading = false,
+}) {
+  const isLast = step === totalSteps;
   return (
-    <div className="onboarding-footer">
-      {!continueOnly && step > 1 && (
-        <button type="button" className="btn-ghost" onClick={onBack}>
-          Back
+    <div className="onboarding-step-footer">
+      <div className="onboarding-footer">
+        {step > 1 && (
+          <button type="button" className="btn-ghost" onClick={onBack} disabled={loading}>
+            Back
+          </button>
+        )}
+        <button type="button" className="btn-primary" onClick={onContinue} disabled={loading}>
+          {loading ? 'Saving…' : (isLast ? continueLabel : 'Continue')}
+        </button>
+      </div>
+      {onSkip && (
+        <button type="button" className="onboarding-skip-step" onClick={onSkip} disabled={loading}>
+          Skip for now
         </button>
       )}
-      <button type="button" className="btn-primary" onClick={onContinue}>
-        {continueLabel}
-      </button>
+    </div>
+  );
+}
+
+function StepIntro({ icon, title, lead }) {
+  return (
+    <div className="onboarding-step-intro">
+      {icon && (
+        <span className="onboarding-step-icon">
+          <Icon name={icon} size={22} />
+        </span>
+      )}
+      <h2 className="onboarding-step-title">{title}</h2>
+      {lead && <p className="onboarding-step-lead">{lead}</p>}
     </div>
   );
 }
 
 export function AdvertiserOnboarding() {
   const [step, setStep] = useState(1);
-  const [profile, setProfile] = useState({ companyName: '', website: '', industry: '', country: '', city: '', description: '' });
   const { updateUser } = useAuth();
   const navigate = useNavigate();
+  const total = ADV_STEPS.length;
 
-  const finish = async (done = false) => {
-    await authApi.updateOnboarding({ step, done, profile });
-    if (done) {
-      updateUser({ onboardingDone: true, onboardingStep: 3 });
-      navigate('/advertiser');
-    } else {
-      setStep((s) => s + 1);
-    }
+  const persist = (done) => authApi.updateOnboarding({ step, done }).catch(() => {});
+
+  const goNext = () => {
+    persist(false);
+    setStep((s) => Math.min(s + 1, total));
   };
 
-  const skipToDashboard = async () => {
-    await authApi.updateOnboarding({ step: 3, done: true, profile });
-    updateUser({ onboardingDone: true, onboardingStep: 3 });
+  const finish = async () => {
+    await persist(true);
+    updateUser({ onboardingDone: true, onboardingStep: total });
+    navigate('/advertiser');
+  };
+
+  const finishAndCreate = async () => {
+    await persist(true);
+    updateUser({ onboardingDone: true, onboardingStep: total });
+    navigate('/advertiser/campaigns/new');
+  };
+
+  const skipAll = async () => {
+    await authApi.updateOnboarding({ step: total, done: true }).catch(() => {});
+    updateUser({ onboardingDone: true, onboardingStep: total });
     navigate('/advertiser');
   };
 
   return (
-    <OnboardingShell onSkip={skipToDashboard}>
-      <div className="max-w-2xl mx-auto cc-animate-fade">
-        <h1 className="page-title" style={{ marginBottom: 8 }}>Welcome to {BRAND.name}</h1>
-        <p className="text-muted" style={{ marginBottom: 32 }}>Let's set up your advertiser account</p>
+    <OnboardingShell onSkip={skipAll}>
+      <div className="onboarding-card-wrap cc-animate-fade">
+        <h1 className="page-title" style={{ marginBottom: 6 }}>Welcome to {BRAND.name}</h1>
+        <p className="text-muted" style={{ marginBottom: 28 }}>Just two quick steps to launch your first campaign.</p>
         <WizardStepper steps={ADV_STEPS} currentStep={step} />
-        <div className="card">
+
+        <div className="card onboarding-card">
           {step === 1 && (
-            <div className="space-y-4">
-              <div><label className="label">Company name</label><input className="input" value={profile.companyName} onChange={(e) => setProfile({ ...profile, companyName: e.target.value })} /></div>
-              <div><label className="label">Website</label><input className="input" value={profile.website} onChange={(e) => setProfile({ ...profile, website: e.target.value })} /></div>
-              <div><label className="label">Industry</label><input className="input" value={profile.industry} onChange={(e) => setProfile({ ...profile, industry: e.target.value })} /></div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div><label className="label">Country</label><input className="input" value={profile.country} onChange={(e) => setProfile({ ...profile, country: e.target.value })} /></div>
-                <div><label className="label">City</label><input className="input" value={profile.city} onChange={(e) => setProfile({ ...profile, city: e.target.value })} /></div>
+            <div>
+              <StepIntro
+                icon="credit_card"
+                title="Add a payment method"
+                lead="Fund campaigns and pay creators securely through Stripe. Mock mode is enabled for development."
+              />
+              <div className="onboarding-placeholder">
+                <Icon name="lock" size={18} />
+                Stripe payment method setup
               </div>
-              <div><label className="label">Description</label><textarea className="input" rows={3} value={profile.description} onChange={(e) => setProfile({ ...profile, description: e.target.value })} /></div>
-              <StepFooter step={step} onBack={() => setStep((s) => s - 1)} onContinue={() => finish(false)} />
+              <StepFooter
+                step={step}
+                totalSteps={total}
+                onContinue={goNext}
+                onSkip={goNext}
+              />
             </div>
           )}
+
           {step === 2 && (
             <div>
-              <p className="text-subtle" style={{ marginBottom: 16 }}>Add a payment method via Stripe (mock mode enabled for dev).</p>
-              <div className="panel-muted text-center text-muted" style={{ padding: 32, border: '1px dashed var(--border)', borderRadius: 10 }}>Stripe payment method placeholder</div>
-              <StepFooter step={step} onBack={() => setStep(1)} onContinue={() => finish(false)} />
-            </div>
-          )}
-          {step === 3 && (
-            <div className="text-center">
-              <p className="text-subtle" style={{ marginBottom: 24 }}>Ready to create your first campaign?</p>
+              <StepIntro
+                icon="campaign"
+                title="Create your first campaign"
+                lead="Publish a funded campaign to start connecting with creators, or head to your dashboard to explore first."
+              />
               <div className="onboarding-cta-stack">
-                <button type="button" onClick={() => finish(true)} className="btn-primary">Go to dashboard</button>
-                <button type="button" onClick={() => { finish(true); navigate('/advertiser/campaigns/new'); }} className="btn-ghost">Create campaign</button>
+                <button type="button" onClick={finishAndCreate} className="btn-primary">Create campaign</button>
+                <button type="button" onClick={finish} className="btn-ghost">Go to dashboard</button>
+              </div>
+              <div className="onboarding-step-footer onboarding-step-footer--center">
+                <button type="button" className="onboarding-skip-step" onClick={() => setStep(1)}>Back</button>
               </div>
             </div>
           )}
@@ -111,52 +161,97 @@ export function AdvertiserOnboarding() {
 
 export function CreatorOnboarding() {
   const [step, setStep] = useState(1);
-  const [profile, setProfile] = useState({ country: '', city: '', bio: '' });
+  const [pageForm, setPageForm] = useState(buildPageFormState());
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { updateUser } = useAuth();
   const navigate = useNavigate();
+  const total = CRE_STEPS.length;
 
-  const finish = async (done = false) => {
-    await authApi.updateOnboarding({ step, done, profile });
-    if (done) {
-      updateUser({ onboardingDone: true, onboardingStep: 3 });
-      navigate('/creator');
-    } else {
-      setStep((s) => s + 1);
+  const persist = (done) => authApi.updateOnboarding({ step, done }).catch(() => {});
+
+  const isPageStarted = pageForm.platformId || pageForm.name || pageForm.url || pageForm.followers;
+
+  const submitPage = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      await pagesApi.create(buildPagePayload(pageForm));
+      await persist(false);
+      setStep(2);
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || 'Could not submit your page.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const skipToDashboard = async () => {
-    await authApi.updateOnboarding({ step: 3, done: true, profile });
-    updateUser({ onboardingDone: true, onboardingStep: 3 });
+  const handlePageContinue = () => {
+    if (!isPageStarted) {
+      setStep(2);
+      persist(false);
+      return;
+    }
+    submitPage();
+  };
+
+  const finish = async () => {
+    await persist(true);
+    updateUser({ onboardingDone: true, onboardingStep: total });
+    navigate('/creator');
+  };
+
+  const skipAll = async () => {
+    await authApi.updateOnboarding({ step: total, done: true }).catch(() => {});
+    updateUser({ onboardingDone: true, onboardingStep: total });
     navigate('/creator');
   };
 
   return (
-    <OnboardingShell onSkip={skipToDashboard}>
-      <div className="max-w-2xl mx-auto cc-animate-fade">
-        <h1 className="page-title" style={{ marginBottom: 8 }}>Welcome, Creator!</h1>
+    <OnboardingShell onSkip={skipAll}>
+      <div className="onboarding-card-wrap cc-animate-fade">
+        <h1 className="page-title" style={{ marginBottom: 6 }}>Welcome, creator!</h1>
+        <p className="text-muted" style={{ marginBottom: 28 }}>List a page and connect payouts to start earning.</p>
         <WizardStepper steps={CRE_STEPS} currentStep={step} />
-        <div className="card" style={{ marginTop: 24 }}>
+
+        <div className="card onboarding-card">
           {step === 1 && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div><label className="label">Country</label><input className="input" value={profile.country} onChange={(e) => setProfile({ ...profile, country: e.target.value })} /></div>
-                <div><label className="label">City</label><input className="input" value={profile.city} onChange={(e) => setProfile({ ...profile, city: e.target.value })} /></div>
-              </div>
-              <div><label className="label">Bio</label><textarea className="input" rows={3} value={profile.bio} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} /></div>
-              <StepFooter step={step} onBack={() => setStep((s) => s - 1)} onContinue={() => finish(false)} />
+            <div>
+              <StepIntro
+                icon="add_photo_alternate"
+                title="List your first page"
+                lead="Add a social page so brands can discover you. It goes to admin review, then appears in the marketplace."
+              />
+              <CreatorPageFormFields form={pageForm} setForm={setPageForm} error={error} />
+              <StepFooter
+                step={step}
+                totalSteps={total}
+                onContinue={handlePageContinue}
+                onSkip={() => { setStep(2); persist(false); }}
+                loading={loading}
+              />
             </div>
           )}
+
           {step === 2 && (
-            <div className="text-center">
-              <p className="text-subtle" style={{ marginBottom: 16 }}>List your first social page from the dashboard.</p>
-              <StepFooter step={step} onBack={() => setStep(1)} onContinue={() => finish(false)} />
-            </div>
-          )}
-          {step === 3 && (
-            <div className="text-center">
-              <p className="text-subtle" style={{ marginBottom: 16 }}>Connect Stripe to receive payouts (mock mode available).</p>
-              <StepFooter step={step} onBack={() => setStep(2)} onContinue={() => finish(true)} continueLabel="Finish setup" continueOnly />
+            <div>
+              <StepIntro
+                icon="account_balance"
+                title="Connect payouts"
+                lead="Link your Stripe account to withdraw earnings from completed collaborations. Mock mode is enabled for development."
+              />
+              <div className="onboarding-placeholder">
+                <Icon name="lock" size={18} />
+                Stripe Connect payout setup
+              </div>
+              <StepFooter
+                step={step}
+                totalSteps={total}
+                onBack={() => setStep(1)}
+                onContinue={finish}
+                onSkip={finish}
+                continueLabel="Finish"
+              />
             </div>
           )}
         </div>

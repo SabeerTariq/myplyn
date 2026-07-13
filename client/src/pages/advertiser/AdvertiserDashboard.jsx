@@ -62,19 +62,20 @@ export function AdvertiserDashboard() {
       </div>
 
       {needsAttention.length > 0 && (
-        <div className="card" style={{ marginBottom: 16 }}>
-          <div className="section-title" style={{ marginBottom: 14 }}>Needs attention</div>
-          {needsAttention.map((c) => (
-            <Link
-              key={c.id}
-              to={`/advertiser/collaborations/${c.id}`}
-              className="flex items-center justify-between transition-colors hover:bg-[var(--surface-2)]"
-              style={{ padding: '10px 8px', borderRadius: 9, marginBottom: 4 }}
-            >
-              <span style={{ fontSize: 13, fontWeight: 600 }}>{c.campaign?.name} — {c.page?.name}</span>
-              <StatusPill status={c.status} />
-            </Link>
-          ))}
+        <div className="card dash-attention-card">
+          <div className="dash-attention-title">Needs attention</div>
+          <div className="dash-attention-list">
+            {needsAttention.map((c) => (
+              <Link
+                key={c.id}
+                to={`/advertiser/collaborations/${c.id}`}
+                className="dash-attention-row"
+              >
+                <span className="dash-attention-label">{c.campaign?.name} — {c.page?.name}</span>
+                <StatusPill status={c.status} />
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </AdvertiserLayout>

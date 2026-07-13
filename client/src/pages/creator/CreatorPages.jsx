@@ -18,9 +18,12 @@ import PageHeader from '../../components/PageHeader';
 import StatusPill from '../../components/StatusPill';
 import TabBar from '../../components/TabBar';
 import ListOrEmpty from '../../components/ListOrEmpty';
+import Icon from '../../components/Icon';
+import WithdrawCard from '../../components/wallet/WithdrawCard';
 import { pagesApi, marketplaceApi, collaborationsApi, walletApi, taxonomyApi } from '../../services/api';
 import { BRAND } from '../../config/brand';
 import { useAuth } from '../../hooks/useAuth';
+import '../../styles/wallet.css';
 
 function Layout({ breadcrumbs, children, banner }) {
   return (
@@ -240,28 +243,87 @@ export function CreatorCollaborationDetail() {
 }
 
 export function CreatorEarnings() {
+  const qc = useQueryClient();
   const { data: earnings } = useQuery({ queryKey: ['earnings'], queryFn: () => walletApi.earnings().then((r) => r.data) });
   const { data: payouts } = useQuery({ queryKey: ['payouts'], queryFn: () => walletApi.payouts().then((r) => r.data) });
   const [amount, setAmount] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState(null);
+
+  const handleWithdraw = async (e) => {
+    e.preventDefault();
+    const value = parseFloat(amount);
+    if (!value || value <= 0) return;
+
+    setLoading(true);
+    setFeedback(null);
+    try {
+      await walletApi.withdraw(value);
+      setAmount('');
+      setFeedback({ type: 'success', text: 'Payout requested successfully.' });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ['earnings'] }),
+        qc.invalidateQueries({ queryKey: ['payouts'] }),
+        qc.invalidateQueries({ queryKey: ['wallet'] }),
+      ]);
+    } catch (err) {
+      setFeedback({ type: 'error', text: err.response?.data?.error || 'Withdrawal failed.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Layout breadcrumbs={[{ label: 'Earnings' }]} banner={<ConnectBanner />}>
-      <PageHeader title="Earnings" lead="View balances, withdraw payouts, and track your earnings history." />
-      <div className="dashboard-summary-grid dashboard-summary-grid--3" style={{ marginTop: 0, marginBottom: 22 }}>
-        <div className="card"><p className="text-sm text-muted">Available</p><p className="stat-value">${Number(earnings?.available || 0).toLocaleString()}</p></div>
-        <div className="card"><p className="text-sm text-muted">Lifetime net</p><p className="stat-value">${Number(earnings?.lifetime?.net || 0).toLocaleString()}</p></div>
-        <div className="card"><p className="text-sm text-muted">Platform fee</p><p className="stat-value">{(earnings?.feePct || 0.15) * 100}%</p></div>
-      </div>
-      <div className="card mb-6">
-        <h3 className="font-semibold mb-4">Withdraw</h3>
-        <div className="flex gap-3"><input type="number" className="input max-w-xs" value={amount} onChange={(e) => setAmount(e.target.value)} /><button className="btn-primary" onClick={() => walletApi.withdraw(parseFloat(amount))}>Withdraw</button></div>
-      </div>
-      <div className="card">
-        <h3 className="font-semibold mb-4">Payout history</h3>
-        <ListOrEmpty items={payouts?.payouts} empty={<p className="text-muted">No payouts yet</p>}>
-          {(items) => items.map((p) => (
-            <div key={p.id} className="flex justify-between py-2 border-b text-sm"><span>${Number(p.netAmount).toFixed(2)}</span><span>{p.status}</span></div>
-          ))}
-        </ListOrEmpty>
+      <div className="earnings-page">
+        <PageHeader title="Earnings" lead="View balances, withdraw payouts, and track your earnings history." />
+
+        <div className="earnings-kpi-grid">
+          <div className="card earnings-kpi">
+            <p className="earnings-kpi-label">Available</p>
+            <p className="earnings-kpi-value">${Number(earnings?.available || 0).toLocaleString()}</p>
+          </div>
+          <div className="card earnings-kpi">
+            <p className="earnings-kpi-label">Lifetime net</p>
+            <p className="earnings-kpi-value">${Number(earnings?.lifetime?.net || 0).toLocaleString()}</p>
+          </div>
+          <div className="card earnings-kpi">
+            <p className="earnings-kpi-label">Platform fee</p>
+            <p className="earnings-kpi-value">{(earnings?.feePct || 0.15) * 100}%</p>
+          </div>
+        </div>
+
+        <div className="earnings-panels">
+          <WithdrawCard
+            available={Number(earnings?.available || 0)}
+            amount={amount}
+            onAmountChange={setAmount}
+            onSubmit={handleWithdraw}
+            loading={loading}
+            feedback={feedback}
+          />
+
+          <div className="earnings-panel">
+            <h3 className="earnings-panel-title">Payout history</h3>
+            <ListOrEmpty
+              items={payouts?.payouts}
+              empty={(
+                <div className="earnings-empty">
+                  <Icon name="receipt_long" size={28} />
+                  <span>No payouts yet</span>
+                  <span>Completed withdrawals will appear here.</span>
+                </div>
+              )}
+            >
+              {(items) => items.map((p) => (
+                <div key={p.id} className="earnings-payout-row">
+                  <span>${Number(p.netAmount).toFixed(2)}</span>
+                  <StatusPill status={p.status} />
+                </div>
+              ))}
+            </ListOrEmpty>
+          </div>
+        </div>
       </div>
     </Layout>
   );

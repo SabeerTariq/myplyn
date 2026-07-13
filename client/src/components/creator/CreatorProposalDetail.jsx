@@ -59,12 +59,30 @@ export default function CreatorProposalDetail({ proposalId }) {
       </Link>
 
       <div className="prop-detail-page-hero">
-        <div>
+        <div className="prop-detail-hero-main">
           <StatusPill status={proposal.status} label={proposalStatusLabel(proposal.status)} />
           <h1>{campaign?.name || 'Campaign'}</h1>
           <p className="prop-detail-page-lead">
             {advertiser?.companyName || 'Brand'} · Submitted {formatProposalDate(proposal.createdAt)}
           </p>
+          <div className="prop-detail-kpi-strip">
+            <div className="prop-detail-kpi">
+              <span>Your bid</span>
+              <strong>{formatMoney(proposal.proposedPrice)}</strong>
+            </div>
+            {campaign?.budgetTotal > 0 && (
+              <div className="prop-detail-kpi">
+                <span>Campaign budget</span>
+                <strong>{formatMoney(campaign.budgetTotal)}</strong>
+              </div>
+            )}
+            {campaign?.perPlacement > 0 && (
+              <div className="prop-detail-kpi">
+                <span>Per placement</span>
+                <strong>{formatMoney(campaign.perPlacement)}</strong>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -98,7 +116,7 @@ export default function CreatorProposalDetail({ proposalId }) {
         </div>
       )}
 
-      <div className="prop-detail-actions-bar">
+      <div className="prop-detail-actions-bar prop-detail-actions-bar--sticky">
         {proposal.status === 'PENDING' && (
           <button type="button" className="btn-ghost prop-withdraw-btn" onClick={() => setShowWithdraw(true)}>
             Withdraw proposal

@@ -221,12 +221,12 @@ export function CampaignDetail() {
 
   return (
     <Layout breadcrumbs={[{ label: 'Campaigns', path: '/advertiser/campaigns' }, { label: campaign.name }]}>
-      <div className="flex items-start justify-between" style={{ marginBottom: 24 }}>
+      <div className="campaign-detail-header flex items-start justify-between" style={{ marginBottom: 24 }}>
         <div>
           <h1 className="page-title">{campaign.name}</h1>
           <div style={{ marginTop: 8 }}><StatusPill status={campaign.status} /></div>
         </div>
-        <div className="flex gap-2">
+        <div className="campaign-detail-actions flex gap-2">
           <button onClick={() => setShowFund(true)} className="btn-ghost">Add funds</button>
           {campaign.status === 'LIVE' && <button onClick={() => setShowPause(true)} className="btn-ghost">Pause</button>}
         </div>
@@ -243,7 +243,7 @@ export function CampaignDetail() {
 
       {tab === 'applications' && (
         <div className="card space-y-3">
-          <div className="flex items-center justify-between gap-3" style={{ marginBottom: 12 }}>
+          <div className="campaign-inbox-row flex items-center justify-between gap-3" style={{ marginBottom: 12 }}>
             <p className="text-muted" style={{ margin: 0 }}>Review and compare proposals in your inbox.</p>
             <Link
               to={`/advertiser/proposals?tab=pending&campaign=${id}`}
@@ -256,9 +256,9 @@ export function CampaignDetail() {
             <Link
               key={app.id}
               to={`/advertiser/proposals/${app.id}`}
-              className="flex items-center justify-between p-3 border rounded-lg no-underline text-inherit transition-colors hover:bg-[var(--surface-2)]"
+              className="campaign-app-row flex items-center justify-between gap-3 p-3 border rounded-lg no-underline text-inherit transition-colors hover:bg-[var(--surface-2)]"
             >
-              <div><p className="font-medium">{app.page?.name}</p><p className="text-sm text-muted">${Number(app.proposedPrice)} — {app.message}</p></div>
+              <div className="campaign-app-info"><p className="font-medium">{app.page?.name}</p><p className="campaign-app-msg text-sm text-muted">${Number(app.proposedPrice)} — {app.message}</p></div>
               <StatusPill status={app.status === 'PENDING' ? 'APPLICATION_PENDING' : app.status === 'APPROVED' ? 'ACCEPTED' : 'CANCELLED'} />
             </Link>
           )) : <p className="text-muted">No applications yet</p>}

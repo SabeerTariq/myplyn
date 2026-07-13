@@ -263,3 +263,306 @@
     height: 40px;
   }
 }
+
+/* Earnings / withdraw */
+.earnings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.earnings-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.earnings-kpi {
+  padding: 14px 16px;
+}
+
+.earnings-kpi-label {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: var(--text-3);
+  font-weight: 600;
+}
+
+.earnings-kpi-value {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.earnings-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.earnings-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--dashboard-radius-sm);
+  padding: 18px 20px;
+  box-shadow: 0 8px 24px rgba(14, 42, 94, 0.04);
+  min-width: 0;
+}
+
+.earnings-panel-title {
+  margin: 0 0 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.earnings-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 12px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 13px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.earnings-empty .material-symbols-rounded {
+  color: var(--text-3);
+  opacity: 0.7;
+}
+
+.earnings-payout-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.earnings-payout-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.wallet-withdraw-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--dashboard-radius-sm);
+  padding: 18px 20px;
+  box-shadow: 0 8px 24px rgba(14, 42, 94, 0.04);
+  min-width: 0;
+}
+
+.wallet-withdraw-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.wallet-withdraw-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  color: var(--accent-text);
+  background: color-mix(in oklch, var(--accent) 14%, white);
+  border: 1px solid color-mix(in oklch, var(--accent) 22%, var(--border));
+}
+
+.wallet-withdraw-card__title {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.wallet-withdraw-card__lead {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.wallet-withdraw-card__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.wallet-withdraw-card__available {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.wallet-withdraw-card__available span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+}
+
+.wallet-withdraw-card__available strong {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--accent-text);
+}
+
+.wallet-withdraw-card__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.wallet-withdraw-card__label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.wallet-withdraw-card__presets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.wallet-withdraw-card__preset {
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wallet-withdraw-card__preset.is-active {
+  border-color: var(--accent);
+  background: color-mix(in oklch, var(--accent) 10%, white);
+  color: var(--accent-text);
+}
+
+.wallet-withdraw-card__preset:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.wallet-withdraw-card__amount-wrap {
+  position: relative;
+}
+
+.wallet-withdraw-card__currency {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+.wallet-withdraw-card__amount {
+  padding-left: 30px;
+  font-size: 16px;
+  font-weight: 700;
+  height: 48px;
+  width: 100%;
+}
+
+.wallet-withdraw-card__feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.wallet-withdraw-card__feedback--success {
+  background: color-mix(in oklch, var(--good) 12%, white);
+  border: 1px solid color-mix(in oklch, var(--good) 28%, var(--border));
+  color: color-mix(in oklch, var(--good) 72%, black);
+}
+
+.wallet-withdraw-card__feedback--error {
+  background: color-mix(in oklch, var(--bad) 10%, white);
+  border: 1px solid color-mix(in oklch, var(--bad) 24%, var(--border));
+  color: color-mix(in oklch, var(--bad) 70%, black);
+}
+
+.wallet-withdraw-card__submit {
+  width: 100%;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.wallet-withdraw-card__note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-3);
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .earnings-panels {
+    grid-template-columns: 1fr;
+  }
+
+  .wallet-withdraw-card__presets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .earnings-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .earnings-kpi:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .earnings-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .earnings-kpi:last-child {
+    grid-column: auto;
+  }
+
+  .earnings-panel,
+  .wallet-withdraw-card {
+    padding: 14px 16px;
+  }
+}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams, Navigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../hooks/useAuth';
-import { authApi } from '../../services/api';
+import { authApi, pagesApi, taxonomyApi } from '../../services/api';
 import { getPostLoginPath } from '../../utils/authRedirect';
 import { brandEmail } from '../../config/brand';
 import Icon from '../../components/Icon';
@@ -11,6 +12,7 @@ import AuthPageShell, {
   AuthDivider,
   CreatorSocialButtons,
 } from '../../layouts/AuthLayout';
+import AuthLocationPickers, { getAuthLocationCity } from '../../components/auth/AuthLocationPickers';
 
 function PasswordField({ value, onChange, placeholder = 'Enter your password', required = true, minLength }) {
   const [visible, setVisible] = useState(false);
@@ -38,6 +40,69 @@ function PasswordField({ value, onChange, placeholder = 'Enter your password', r
     </div>
   );
 }
+
+const ADVERTISER_SOCIAL_FIELDS = [
+  { key: 'instagram', label: 'Instagram', placeholder: 'https://instagram.com/yourbrand' },
+  { key: 'facebook', label: 'Facebook', placeholder: 'https://facebook.com/yourbrand' },
+  { key: 'linkedin', label: 'LinkedIn', placeholder: 'https://linkedin.com/company/yourbrand' },
+  { key: 'tiktok', label: 'TikTok', placeholder: 'https://tiktok.com/@yourbrand' },
+  { key: 'youtube', label: 'YouTube', placeholder: 'https://youtube.com/@yourbrand' },
+  { key: 'x', label: 'X (Twitter)', placeholder: 'https://x.com/yourbrand' },
+];
+
+function cleanSocialLinks(links = {}) {
+  return Object.fromEntries(
+    Object.entries(links).filter(([, value]) => typeof value === 'string' && value.trim()),
+  );
+}
+const CREATOR_NICHES = [
+  'Fashion & Beauty',
+  'Food & Lifestyle',
+  'Technology',
+  'Health & Fitness',
+  'Travel',
+  'Gaming',
+  'Education',
+  'Finance',
+  'Entertainment',
+  'Other',
+];
+
+const EMPTY_PAGE_DRAFT = {
+  platformId: '',
+  name: '',
+  url: '',
+  followers: '',
+};
+
+function getSignupProgress(role, creatorStep) {
+  if (role === 'creator') {
+    const labels = ['Account', 'Profile', 'Your pages'];
+    return {
+      stepLabel: `Step ${creatorStep} of 3`,
+      stepName: labels[creatorStep - 1],
+      width: `${(creatorStep / 3) * 100}%`,
+    };
+  }
+
+  return {
+    stepLabel: 'Step 2 of 2',
+    stepName: 'Create account',
+    width: '100%',
+  };
+}
+const ADVERTISER_INDUSTRIES = [
+  'Fashion & Beauty',
+  'Food & Beverage',
+  'Technology',
+  'Health & Wellness',
+  'Finance',
+  'Entertainment',
+  'Travel & Hospitality',
+  'Retail & E-commerce',
+  'Education',
+  'Other',
+];
 
 const ROLE_OPTIONS = [
   {
@@ -111,15 +176,59 @@ export function SignupRolePage() {
 export function SignupFormPage({ role }) {
   const { signup } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: '', password: '', otp: '', companyName: '', country: '', niche: '' });
+  const isCreator = role === 'creator';
+  const [creatorStep, setCreatorStep] = useState(1);
+  const [form, setForm] = useState({
+    email: '',
+    password: '',
+    otp: '',
+    companyName: '',
+    website: '',
+    industry: '',
+    country: '',
+    state: '',
+    city: '',
+    customCity: '',
+    niche: '',
+    bio: '',
+    socialLinks: {
+      instagram: '',
+      facebook: '',
+      linkedin: '',
+      tiktok: '',
+      youtube: '',
+      x: '',
+    },
+  });
+  const [pages, setPages] = useState([]);
+  const [pageDraft, setPageDraft] = useState({ ...EMPTY_PAGE_DRAFT });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [sendingOtp, setSendingOtp] = useState(false);
   const [otpCooldown, setOtpCooldown] = useState(0);
-  const variant = role === 'creator' ? 'creator-signup' : 'advertiser-signup';
-  const roleLabel = role === 'creator' ? 'creator' : 'advertiser';
+  const variant = isCreator ? 'creator-signup' : 'advertiser-signup';
+  const roleLabel = isCreator ? 'creator' : 'advertiser';
   const otpFromEmail = brandEmail('info');
+  const progress = getSignupProgress(role, creatorStep);
+
+  const { data: countries } = useQuery({
+    queryKey: ['countries'],
+    queryFn: () => taxonomyApi.countries().then((r) => r.data.countries),
+    enabled: isCreator || role === 'advertiser',
+  });
+
+  const { data: states } = useQuery({
+    queryKey: ['states', form.country],
+    queryFn: () => taxonomyApi.states(form.country).then((r) => r.data.states),
+    enabled: !!form.country,
+  });
+
+  const { data: platforms } = useQuery({
+    queryKey: ['platforms'],
+    queryFn: () => taxonomyApi.platforms().then((r) => r.data.platforms),
+    enabled: isCreator && creatorStep === 3,
+  });
 
   useEffect(() => {
     if (!otpCooldown) return undefined;
@@ -143,23 +252,396 @@ export function SignupFormPage({ role }) {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const validateAccountStep = () => {
+    if (!form.email) {
+      setError('Enter your email address.');
+      return false;
+    }
     if (!otpSent) {
       setError('Send and enter the verification code from your email first.');
-      return;
+      return false;
     }
-    setLoading(true);
+    if (form.otp.length !== 6) {
+      setError('Enter the 6-digit verification code.');
+      return false;
+    }
+    if (form.password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return false;
+    }
+    return true;
+  };
+
+  const validateProfileStep = () => {
+    if (!form.country) {
+      setError('Select your country.');
+      return false;
+    }
+    if (states?.length > 0 && !form.state) {
+      setError('Select your state or region.');
+      return false;
+    }
+    if (!form.city.trim()) {
+      setError('Enter your city.');
+      return false;
+    }
+    if (!form.niche) {
+      setError('Select your primary niche.');
+      return false;
+    }
+    return true;
+  };
+
+  const handleCreatorAccountContinue = (e) => {
+    e.preventDefault();
     setError('');
+    if (!validateAccountStep()) return;
+    setCreatorStep(2);
+  };
+
+  const handleCreatorProfileContinue = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (!validateProfileStep()) return;
+
+    setLoading(true);
     try {
-      const user = await signup({ ...form, role: role.toUpperCase() });
-      navigate(user.role === 'ADVERTISER' ? '/advertiser/onboarding' : '/creator/onboarding');
+      await signup({ ...form, role: 'CREATOR' });
+      setCreatorStep(3);
     } catch (err) {
       setError(err.response?.data?.error || 'Signup failed');
     } finally {
       setLoading(false);
     }
   };
+
+  const handleAddPage = () => {
+    setError('');
+    if (!pageDraft.platformId || !pageDraft.name.trim() || !pageDraft.url.trim() || !pageDraft.followers) {
+      setError('Fill in platform, page name, profile URL, and followers to add a page.');
+      return;
+    }
+
+    const followers = Number(pageDraft.followers);
+    if (!Number.isFinite(followers) || followers < 0) {
+      setError('Enter a valid follower count.');
+      return;
+    }
+
+    const platformName = platforms?.find((p) => p.id === pageDraft.platformId)?.name || 'Page';
+    setPages((current) => [
+      ...current,
+      {
+        ...pageDraft,
+        name: pageDraft.name.trim(),
+        url: pageDraft.url.trim(),
+        followers: String(followers),
+        platformName,
+      },
+    ]);
+    setPageDraft({ ...EMPTY_PAGE_DRAFT });
+  };
+
+  const buildSignupPagePayload = (page) => ({
+    platformId: page.platformId,
+    name: page.name,
+    url: page.url,
+    followers: parseInt(page.followers, 10),
+    avgReach: 0,
+    country: form.country,
+    state: form.state || null,
+    city: form.city.trim(),
+    customNiche: form.niche || null,
+  });
+
+  const finishCreatorSignup = async (skipPages = false) => {
+    setLoading(true);
+    setError('');
+    try {
+      if (!skipPages) {
+        if (pages.length === 0) {
+          setError('Add at least one page, or choose Skip for now.');
+          setLoading(false);
+          return;
+        }
+        for (const page of pages) {
+          await pagesApi.create(buildSignupPagePayload(page));
+        }
+      }
+      navigate('/creator/onboarding');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Could not save your pages');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const validateAdvertiserBusinessStep = () => {
+    if (!form.country) {
+      setError('Select your business country.');
+      return false;
+    }
+    if (states?.length > 0 && !form.state) {
+      setError('Select your state or region.');
+      return false;
+    }
+    if (!getAuthLocationCity(form)) {
+      setError('Select or enter your business city.');
+      return false;
+    }
+    return true;
+  };
+
+  const handleAdvertiserSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateAccountStep()) return;
+    if (!validateAdvertiserBusinessStep()) return;
+
+    setLoading(true);
+    setError('');
+    try {
+      await signup({
+        ...form,
+        city: getAuthLocationCity(form),
+        socialLinks: cleanSocialLinks(form.socialLinks),
+        role: 'ADVERTISER',
+      });
+      navigate('/advertiser/onboarding');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Signup failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const accountFields = (
+    <>
+      <div className="auth-field">
+        <label htmlFor="signup-email">Email</label>
+        <div className="auth-otp-row">
+          <input
+            id="signup-email"
+            type="email"
+            className="auth-input"
+            placeholder="Enter your email"
+            required
+            value={form.email}
+            onChange={(e) => {
+              setForm({ ...form, email: e.target.value, otp: '' });
+              setOtpSent(false);
+            }}
+          />
+          <button
+            type="button"
+            className="auth-otp-send"
+            disabled={!form.email || sendingOtp || otpCooldown > 0}
+            onClick={handleSendOtp}
+          >
+            {sendingOtp ? 'Sending…' : otpCooldown > 0 ? `Resend in ${otpCooldown}s` : otpSent ? 'Resend code' : 'Send code'}
+          </button>
+        </div>
+        <p className="auth-otp-hint">
+          We&apos;ll email a 6-digit code from {otpFromEmail}.
+        </p>
+      </div>
+
+      {otpSent && (
+        <div className="auth-field">
+          <label htmlFor="signup-otp">Verification code</label>
+          <input
+            id="signup-otp"
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            className="auth-input auth-otp-input"
+            placeholder="Enter 6-digit code"
+            required
+            maxLength={6}
+            pattern="[0-9]{6}"
+            value={form.otp}
+            onChange={(e) => setForm({ ...form, otp: e.target.value.replace(/\D/g, '').slice(0, 6) })}
+          />
+        </div>
+      )}
+
+      <div className="auth-field">
+        <label htmlFor="signup-password">Password</label>
+        <PasswordField
+          value={form.password}
+          minLength={8}
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
+        />
+      </div>
+    </>
+  );
+
+  const creatorProfileFields = (
+    <div className="auth-creator-section">
+      <p className="auth-section-title">Creator profile</p>
+      <p className="auth-section-lead">Help brands understand who you are and where your audience is based.</p>
+
+      <div className="auth-field">
+        <label htmlFor="signup-country">Country</label>
+        <select
+          id="signup-country"
+          className="auth-input select"
+          required
+          value={form.country}
+          onChange={(e) => setForm({ ...form, country: e.target.value, state: '' })}
+        >
+          <option value="">Select country</option>
+          {countries?.map((item) => (
+            <option key={item.code} value={item.code}>{item.name}</option>
+          ))}
+        </select>
+      </div>
+
+      {states?.length > 0 && (
+        <div className="auth-field">
+          <label htmlFor="signup-state">State / region</label>
+          <select
+            id="signup-state"
+            className="auth-input select"
+            required
+            value={form.state}
+            onChange={(e) => setForm({ ...form, state: e.target.value })}
+          >
+            <option value="">Select state or region</option>
+            {states.map((item) => (
+              <option key={item.code} value={item.code}>{item.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      <div className="auth-field">
+        <label htmlFor="signup-city">City</label>
+        <input
+          id="signup-city"
+          className="auth-input"
+          placeholder="Where are you based?"
+          required
+          value={form.city}
+          onChange={(e) => setForm({ ...form, city: e.target.value })}
+        />
+      </div>
+
+      <div className="auth-field">
+        <label htmlFor="signup-niche">Primary niche</label>
+        <select
+          id="signup-niche"
+          className="auth-input select"
+          required
+          value={form.niche}
+          onChange={(e) => setForm({ ...form, niche: e.target.value })}
+        >
+          <option value="">Select your niche</option>
+          {CREATOR_NICHES.map((item) => (
+            <option key={item} value={item}>{item}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="auth-field">
+        <label htmlFor="signup-bio">About you</label>
+        <textarea
+          id="signup-bio"
+          className="auth-input auth-textarea"
+          rows={3}
+          placeholder="Tell brands what you create and who your audience is."
+          value={form.bio}
+          onChange={(e) => setForm({ ...form, bio: e.target.value })}
+        />
+        <p className="auth-field-hint">Optional — shown on your profile and proposals.</p>
+      </div>
+    </div>
+  );
+
+  const creatorPagesStep = (
+    <div className="auth-creator-section">
+      <p className="auth-section-title">List your pages</p>
+      <p className="auth-section-lead">Add the social pages you want to monetize. You can add more later from your dashboard.</p>
+
+      {pages.length > 0 && (
+        <div className="auth-page-list">
+          {pages.map((page, index) => (
+            <div key={`${page.platformId}-${page.url}-${index}`} className="auth-page-card">
+              <div className="auth-page-card-info">
+                <strong>{page.name}</strong>
+                <span>{page.platformName} · {Number(page.followers).toLocaleString()} followers</span>
+              </div>
+              <button
+                type="button"
+                className="auth-page-remove"
+                onClick={() => setPages((current) => current.filter((_, i) => i !== index))}
+                aria-label={`Remove ${page.name}`}
+              >
+                <Icon name="close" size={18} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="auth-page-draft">
+        <div className="auth-field">
+          <label htmlFor="signup-page-platform">Platform</label>
+          <select
+            id="signup-page-platform"
+            className="auth-input select"
+            value={pageDraft.platformId}
+            onChange={(e) => setPageDraft({ ...pageDraft, platformId: e.target.value })}
+          >
+            <option value="">Select platform</option>
+            {platforms?.map((item) => (
+              <option key={item.id} value={item.id}>{item.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="auth-field">
+          <label htmlFor="signup-page-name">Page name</label>
+          <input
+            id="signup-page-name"
+            className="auth-input"
+            placeholder="@yourhandle or channel name"
+            value={pageDraft.name}
+            onChange={(e) => setPageDraft({ ...pageDraft, name: e.target.value })}
+          />
+        </div>
+
+        <div className="auth-field">
+          <label htmlFor="signup-page-url">Profile URL</label>
+          <input
+            id="signup-page-url"
+            type="url"
+            className="auth-input"
+            placeholder="https://instagram.com/yourpage"
+            value={pageDraft.url}
+            onChange={(e) => setPageDraft({ ...pageDraft, url: e.target.value })}
+          />
+        </div>
+
+        <div className="auth-field">
+          <label htmlFor="signup-page-followers">Followers</label>
+          <input
+            id="signup-page-followers"
+            type="number"
+            min="0"
+            className="auth-input"
+            placeholder="e.g. 25000"
+            value={pageDraft.followers}
+            onChange={(e) => setPageDraft({ ...pageDraft, followers: e.target.value })}
+          />
+        </div>
+
+        <button type="button" className="auth-add-page-btn" onClick={handleAddPage}>
+          <Icon name="add" size={18} />
+          Add page
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <AuthPageShell variant={variant}>
@@ -170,126 +652,160 @@ export function SignupFormPage({ role }) {
 
       <div className="auth-progress">
         <div className="auth-progress-top">
-          <span>Step 2 of 2</span>
-          <span>Create account</span>
+          <span>{progress.stepLabel}</span>
+          <span>{progress.stepName}</span>
         </div>
-        <div className="auth-progress-bar"><span style={{ width: '100%' }} /></div>
+        <div className="auth-progress-bar"><span style={{ width: progress.width }} /></div>
       </div>
 
-      <h2>Create your {roleLabel} account</h2>
+      <h2>
+        {isCreator && creatorStep === 3
+          ? 'Add your social pages'
+          : `Create your ${roleLabel} account`}
+      </h2>
       <p className="auth-form-lead">
-        {role === 'creator'
-          ? 'Verify your email, then set up your profile to list pages and start earning.'
-          : 'Verify your email, then set up your business profile to launch your first campaign.'}
+        {isCreator && creatorStep === 1 && 'Verify your email and set a secure password.'}
+        {isCreator && creatorStep === 2 && 'Tell us about yourself so brands can find the right match.'}
+        {isCreator && creatorStep === 3 && 'List the pages you want to use for brand collaborations.'}
+        {!isCreator && 'Verify your email, then set up your business profile to launch your first campaign.'}
       </p>
 
-      <form onSubmit={handleSubmit}>
-        <div className="auth-field">
-          <label htmlFor="signup-email">Email</label>
-          <div className="auth-otp-row">
-            <input
-              id="signup-email"
-              type="email"
-              className="auth-input"
-              placeholder="Enter your email"
-              required
-              value={form.email}
-              onChange={(e) => {
-                setForm({ ...form, email: e.target.value, otp: '' });
-                setOtpSent(false);
-              }}
+      {isCreator ? (
+        <>
+          {creatorStep === 1 && (
+            <form onSubmit={handleCreatorAccountContinue}>
+              {accountFields}
+              {error && <p className="auth-error">{error}</p>}
+              <button type="submit" className="auth-submit">Continue</button>
+              <p className="auth-switch">
+                Already have an account? <Link to="/auth/login/creator">Log in</Link>
+              </p>
+            </form>
+          )}
+
+          {creatorStep === 2 && (
+            <form onSubmit={handleCreatorProfileContinue}>
+              {creatorProfileFields}
+              {error && <p className="auth-error">{error}</p>}
+              <div className="auth-step-actions">
+                <button type="button" className="btn-ghost auth-step-back-btn" onClick={() => setCreatorStep(1)}>Back</button>
+                <button type="submit" className="auth-submit" disabled={loading}>
+                  {loading ? 'Creating account…' : 'Continue'}
+                </button>
+              </div>
+              <p className="auth-switch">
+                Already have an account? <Link to="/auth/login/creator">Log in</Link>
+              </p>
+            </form>
+          )}
+
+          {creatorStep === 3 && (
+            <div>
+              {creatorPagesStep}
+              {error && <p className="auth-error">{error}</p>}
+              <div className="auth-step-actions">
+                <button type="button" className="auth-submit" disabled={loading} onClick={() => finishCreatorSignup(false)}>
+                  {loading ? 'Saving pages…' : 'Finish signup'}
+                </button>
+              </div>
+              <button type="button" className="auth-skip-link" disabled={loading} onClick={() => finishCreatorSignup(true)}>
+                Skip for now
+              </button>
+              <p className="auth-switch">
+                Already have an account? <Link to="/auth/login/creator">Log in</Link>
+              </p>
+            </div>
+          )}
+        </>
+      ) : (
+        <form onSubmit={handleAdvertiserSubmit}>
+          {accountFields}
+          <div className="auth-advertiser-section">
+            <p className="auth-section-title">Business details</p>
+            <p className="auth-section-lead">Tell us about your brand so we can tailor your dashboard and creator matches.</p>
+
+            <div className="auth-field">
+              <label htmlFor="signup-company">Company name</label>
+              <input
+                id="signup-company"
+                className="auth-input"
+                placeholder="Your business or brand name"
+                required
+                value={form.companyName}
+                onChange={(e) => setForm({ ...form, companyName: e.target.value })}
+              />
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="signup-website">Website</label>
+              <input
+                id="signup-website"
+                type="url"
+                className="auth-input"
+                placeholder="https://yourcompany.com"
+                value={form.website}
+                onChange={(e) => setForm({ ...form, website: e.target.value })}
+              />
+              <p className="auth-field-hint">Optional — helps creators learn about your brand.</p>
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="signup-industry">Industry</label>
+              <select
+                id="signup-industry"
+                className="auth-input select"
+                value={form.industry}
+                onChange={(e) => setForm({ ...form, industry: e.target.value })}
+              >
+                <option value="">Select your industry</option>
+                {ADVERTISER_INDUSTRIES.map((item) => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
+            </div>
+
+            <AuthLocationPickers
+              value={form}
+              onChange={(patch) => setForm({ ...form, ...patch })}
+              countryLabel="Country"
+              cityLabel="City"
             />
-            <button
-              type="button"
-              className="auth-otp-send"
-              disabled={!form.email || sendingOtp || otpCooldown > 0}
-              onClick={handleSendOtp}
-            >
-              {sendingOtp ? 'Sending…' : otpCooldown > 0 ? `Resend in ${otpCooldown}s` : otpSent ? 'Resend code' : 'Send code'}
-            </button>
+
+            <div className="auth-social-section">
+              <p className="auth-section-title">Social links</p>
+              <p className="auth-section-lead">Optional — help creators verify and learn about your brand presence.</p>
+              <div className="auth-social-grid">
+                {ADVERTISER_SOCIAL_FIELDS.map((item) => (
+                  <div key={item.key} className="auth-field">
+                    <label htmlFor={`signup-social-${item.key}`}>{item.label}</label>
+                    <input
+                      id={`signup-social-${item.key}`}
+                      type="url"
+                      className="auth-input"
+                      placeholder={item.placeholder}
+                      value={form.socialLinks[item.key]}
+                      onChange={(e) => setForm({
+                        ...form,
+                        socialLinks: { ...form.socialLinks, [item.key]: e.target.value },
+                      })}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-          <p className="auth-otp-hint">
-            We&apos;ll email a 6-digit code from {otpFromEmail}.
+
+          {error && <p className="auth-error">{error}</p>}
+
+          <button type="submit" className="auth-submit" disabled={loading}>
+            {loading ? 'Creating account…' : 'Create account'}
+          </button>
+
+          <p className="auth-switch">
+            Already have an account? <Link to="/auth/login/advertiser">Log in</Link>
           </p>
-        </div>
-
-        {otpSent && (
-          <div className="auth-field">
-            <label htmlFor="signup-otp">Verification code</label>
-            <input
-              id="signup-otp"
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              className="auth-input auth-otp-input"
-              placeholder="Enter 6-digit code"
-              required
-              maxLength={6}
-              pattern="[0-9]{6}"
-              value={form.otp}
-              onChange={(e) => setForm({ ...form, otp: e.target.value.replace(/\D/g, '').slice(0, 6) })}
-            />
-          </div>
-        )}
-
-        <div className="auth-field">
-          <label htmlFor="signup-password">Password</label>
-          <PasswordField
-            value={form.password}
-            minLength={8}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-          />
-        </div>
-
-        {role === 'advertiser' && (
-          <div className="auth-field">
-            <label htmlFor="signup-company">Company name</label>
-            <input
-              id="signup-company"
-              className="auth-input"
-              placeholder="Your business name"
-              required
-              value={form.companyName}
-              onChange={(e) => setForm({ ...form, companyName: e.target.value })}
-            />
-          </div>
-        )}
-
-        {role === 'creator' && (
-          <>
-            <div className="auth-field">
-              <label htmlFor="signup-country">Country</label>
-              <input
-                id="signup-country"
-                className="auth-input"
-                placeholder="Where are you based?"
-                value={form.country}
-                onChange={(e) => setForm({ ...form, country: e.target.value })}
-              />
-            </div>
-            <div className="auth-field">
-              <label htmlFor="signup-niche">Primary niche</label>
-              <input
-                id="signup-niche"
-                className="auth-input"
-                placeholder="e.g. Fashion, Food, Tech"
-                value={form.niche}
-                onChange={(e) => setForm({ ...form, niche: e.target.value })}
-              />
-            </div>
-          </>
-        )}
-
-        {error && <p className="auth-error">{error}</p>}
-
-        <button type="submit" className="auth-submit" disabled={loading}>
-          {loading ? 'Creating account…' : 'Create account'}
-        </button>
-
-        <p className="auth-switch">
-          Already have an account? <Link to={`/auth/login/${role}`}>Log in</Link>
-        </p>
-      </form>
+        </form>
+      )}
     </AuthPageShell>
   );
 }

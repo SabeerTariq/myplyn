@@ -14,6 +14,15 @@ body {
   overflow-x: hidden;
 }
 
+/* Global long-text safety net: break unbroken strings instead of overflowing */
+p, h1, h2, h3, h4, h5, h6,
+span, a, li, dt, dd,
+td, th, label, figcaption, blockquote,
+strong, b, em, small, code {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
 .material-symbols-rounded {
   font-family: var(--ms);
   font-weight: normal;
@@ -27,6 +36,8 @@ body {
   justify-content: center;
   white-space: nowrap;
   word-wrap: normal;
+  word-break: normal;
+  overflow-wrap: normal;
   direction: ltr;
   flex-shrink: 0;
   font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
@@ -814,8 +825,121 @@ html.fonts-ready .material-symbols-rounded {
   .dashboard-summary-grid,
   .dashboard-summary-grid--4,
   .dashboard-summary-grid--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .kpi-card {
+    padding: 14px;
+    min-height: 84px;
+    gap: 8px;
+    border-radius: 14px;
+  }
+
+  .kpi-card .text-\[25px\] {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 380px) {
+  .dashboard-summary-grid,
+  .dashboard-summary-grid--4,
+  .dashboard-summary-grid--3 {
     grid-template-columns: 1fr;
   }
+}
+
+.dash-attention-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dash-attention-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.dash-attention-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dash-attention-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.dash-attention-label {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dash-attention-row .status-pill,
+.dash-attention-row [class*='status-pill'] {
+  flex: none;
+}
+
+@media (max-width: 640px) {
+  .campaign-detail-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .campaign-detail-actions {
+    width: 100%;
+  }
+
+  .campaign-detail-actions .btn-ghost {
+    flex: 1;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .campaign-inbox-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .campaign-inbox-row .btn-primary {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+}
+
+.campaign-app-info {
+  min-width: 0;
+}
+
+.campaign-app-msg {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.campaign-app-row > .status-pill,
+.campaign-app-row [class*='status-pill'] {
+  flex: none;
 }
 
 @media (max-width: 720px) {

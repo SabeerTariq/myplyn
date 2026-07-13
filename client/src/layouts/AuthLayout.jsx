@@ -1,7 +1,30 @@
 import { Link } from 'react-router-dom';
 import BrandMark from '../components/BrandMark';
 import Icon from '../components/Icon';
+import {
+  GoogleBrandLogo,
+  FacebookBrandLogo,
+  AppleBrandLogo,
+  InstagramBrandLogo,
+  TikTokBrandLogo,
+  YouTubeBrandLogo,
+  XBrandLogo,
+  LinkedInBrandLogo,
+} from '../landing/SocialBrandIcons';
 import '../styles/auth.css';
+
+function AuthSocialButton({ label, className = '', onClick, icon }) {
+  return (
+    <button
+      type="button"
+      className={`auth-social-btn ${className}`.trim()}
+      onClick={onClick}
+    >
+      <span className="auth-social-icon" aria-hidden="true">{icon}</span>
+      {label}
+    </button>
+  );
+}
 
 const FEATURES = [
   { icon: 'verified_user', title: 'Secure & Trusted', text: 'Your data and earnings are protected at every step.' },
@@ -104,14 +127,16 @@ export function AuthMarketing({ variant = 'login' }) {
 }
 
 export function AuthPageShell({ variant = 'login', children }) {
+  const showMarketing = variant.includes('login');
+
   return (
     <div className="auth-page cc-animate-fade">
       <Link to="/" className="auth-page-logo">
         <BrandMark size={48} />
       </Link>
 
-      <div className="auth-shell">
-        <AuthMarketing variant={variant} />
+      <div className={`auth-shell${showMarketing ? '' : ' auth-shell--solo'}`}>
+        {showMarketing && <AuthMarketing variant={variant} />}
         <div className="auth-form-panel">{children}</div>
       </div>
 
@@ -127,26 +152,22 @@ export function AuthPageShell({ variant = 'login', children }) {
 
 export function AuthSocialButtons({ onSignup }) {
   const social = [
-    { label: 'Continue with Google', className: '', icon: 'https://www.google.com/favicon.ico' },
-    { label: 'Continue with Facebook', className: 'auth-social-btn--facebook', icon: null, letter: 'f' },
-    { label: 'Continue with Apple', className: '', icon: 'apple', isIcon: true },
-    { label: 'Continue with Email', className: '', icon: 'mail', isIcon: true },
+    { label: 'Continue with Google', icon: <GoogleBrandLogo /> },
+    { label: 'Continue with Facebook', icon: <FacebookBrandLogo /> },
+    { label: 'Continue with Apple', className: 'auth-social-btn--apple', icon: <AppleBrandLogo /> },
+    { label: 'Continue with Email', icon: <Icon name="mail" size={20} /> },
   ];
 
   return (
     <div className="auth-social-stack">
       {social.map((item) => (
-        <button
+        <AuthSocialButton
           key={item.label}
-          type="button"
-          className={`auth-social-btn ${item.className}`.trim()}
+          label={item.label}
+          className={item.className}
           onClick={onSignup}
-        >
-          {item.icon && !item.isIcon ? <img src={item.icon} alt="" /> : null}
-          {item.isIcon ? <Icon name={item.icon} size={18} /> : null}
-          {!item.icon && item.letter ? <span>{item.letter}</span> : null}
-          {item.label}
-        </button>
+          icon={item.icon}
+        />
       ))}
     </div>
   );
@@ -154,22 +175,24 @@ export function AuthSocialButtons({ onSignup }) {
 
 export function CreatorSocialButtons({ onSignup }) {
   const items = [
-    { label: 'Continue with Facebook', className: 'auth-social-btn--facebook', text: 'f' },
-    { label: 'Continue with Instagram', className: 'auth-social-btn--instagram', text: '◎' },
-    { label: 'Continue with TikTok', className: 'auth-social-btn--tiktok', text: '♪' },
-    { label: 'Continue with YouTube', className: 'auth-social-btn--youtube', text: '▶' },
-    { label: 'Continue with X', className: 'auth-social-btn--x', text: 'X' },
-    { label: 'Continue with LinkedIn', className: 'auth-social-btn--linkedin', text: 'in' },
-    { label: 'Continue with Email', className: '', icon: 'mail', isIcon: true },
+    { label: 'Continue with Facebook', icon: <FacebookBrandLogo /> },
+    { label: 'Continue with Instagram', icon: <InstagramBrandLogo /> },
+    { label: 'Continue with TikTok', icon: <TikTokBrandLogo /> },
+    { label: 'Continue with YouTube', icon: <YouTubeBrandLogo /> },
+    { label: 'Continue with X', icon: <XBrandLogo /> },
+    { label: 'Continue with LinkedIn', icon: <LinkedInBrandLogo /> },
+    { label: 'Continue with Email', icon: <Icon name="mail" size={20} /> },
   ];
 
   return (
     <div className="auth-social-stack">
       {items.map((item) => (
-        <button key={item.label} type="button" className={`auth-social-btn ${item.className}`} onClick={onSignup}>
-          {item.isIcon ? <Icon name={item.icon} size={18} /> : <span>{item.text}</span>}
-          {item.label}
-        </button>
+        <AuthSocialButton
+          key={item.label}
+          label={item.label}
+          onClick={onSignup}
+          icon={item.icon}
+        />
       ))}
     </div>
   );

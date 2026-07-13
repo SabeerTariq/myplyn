@@ -124,9 +124,33 @@ export default function AdvertiserProposalDetail({ proposalId }) {
               <span className={`prop-bid-delta prop-bid-delta--${bidDelta.tone}`}>{bidDelta.label}</span>
             )}
           </div>
+          <div className="prop-detail-kpi-strip">
+            <div className="prop-detail-kpi">
+              <span>Bid</span>
+              <strong>{formatMoney(proposal.proposedPrice)}</strong>
+            </div>
+            {campaign?.perPlacement && (
+              <div className="prop-detail-kpi">
+                <span>Per placement</span>
+                <strong>{formatMoney(campaign.perPlacement)}</strong>
+              </div>
+            )}
+            {page?.followers > 0 && (
+              <div className="prop-detail-kpi">
+                <span>Followers</span>
+                <strong>{formatCount(page.followers)}</strong>
+              </div>
+            )}
+            {page?.engagement > 0 && (
+              <div className="prop-detail-kpi">
+                <span>Engagement</span>
+                <strong>{Number(page.engagement).toFixed(1)}%</strong>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="prop-detail-actions-bar">
+        <div className="prop-detail-actions-bar prop-detail-actions-bar--hero prop-detail-actions-bar--mobile-show">
           {isPending && (
             <>
               <button type="button" className="btn-primary dashboard-pill-btn" onClick={() => setShowAccept(true)}>
