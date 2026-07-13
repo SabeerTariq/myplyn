@@ -7,6 +7,34 @@ import Lenis from 'lenis';
 gsap.registerPlugin(ScrollTrigger);
 
 const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const NAV_OFFSET = -90;
+
+export function scrollToLandingHash(hash, { immediate = false } = {}) {
+  if (!hash || typeof window === 'undefined') return;
+  const target = hash.startsWith('#') ? hash : `#${hash}`;
+  const el = document.querySelector(target);
+  if (!el) return;
+
+  const lenis = window.__landingLenis;
+  if (lenis?.scrollTo) {
+    lenis.scrollTo(target, { offset: NAV_OFFSET, immediate });
+    return;
+  }
+
+  const top = el.getBoundingClientRect().top + window.scrollY + NAV_OFFSET;
+  window.scrollTo({ top: Math.max(0, top), behavior: immediate || reduce ? 'auto' : 'smooth' });
+}
+
+export function scrollLandingTop({ immediate = true } = {}) {
+  const lenis = window.__landingLenis;
+  if (lenis?.scrollTo) {
+    lenis.scrollTo(0, { immediate, force: true });
+    return;
+  }
+  window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
 
 function runCounters(useGSAP) {
   document.querySelectorAll('.landing-site [data-count]').forEach((el) => {
@@ -57,7 +85,7 @@ function initMotion() {
         const id = a.getAttribute('href');
         if (id.length > 1 && document.querySelector(id)) {
           e.preventDefault();
-          lenis.scrollTo(id, { offset: -90 });
+          scrollToLandingHash(id);
         }
       });
     });
@@ -166,9 +194,11 @@ export function useLandingMotion() {
   }, [pathname]);
 
   useEffect(() => {
-    if (!hash) return;
-    const el = document.querySelector(hash);
-    if (el) el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    if (!hash) return undefined;
+    const timer = window.setTimeout(() => {
+      scrollToLandingHash(hash, { immediate: reduce });
+    }, pathname === '/' ? 0 : 120);
+    return () => window.clearTimeout(timer);
   }, [pathname, hash]);
 }
 

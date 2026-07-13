@@ -2,10 +2,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BRAND } from '../config/brand';
 import { useAuth } from '../hooks/useAuth';
 import { getPostLoginPath } from '../utils/authRedirect';
+import { scrollLandingTop, scrollToLandingHash } from './useLandingMotion';
 
 const links = [
-  { to: '/', label: 'For Creators' },
-  { to: '/', label: 'For Businesses' },
+  { to: '/', hash: '#creators', label: 'For Creators' },
+  { to: '/', hash: '#brands', label: 'For Businesses' },
   { to: '/how-it-works', label: 'How it Works', match: '/how-it-works' },
   { to: '/pricing', label: 'Pricing', match: '/pricing' },
   { to: '/about', label: 'About', match: '/about' },
@@ -21,26 +22,31 @@ export default function LandingNav() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  const goTop = () => {
-    const lenis = window.__landingLenis;
-    if (lenis?.scrollTo) {
-      lenis.scrollTo(0, { immediate: true, force: true });
+  const handleNavClick = (e, link) => {
+    if (link.hash) {
+      e.preventDefault();
+      if (pathname === '/') {
+        scrollToLandingHash(link.hash);
+      } else {
+        navigate({ pathname: '/', hash: link.hash });
+      }
+      return;
     }
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  };
 
-  const goHomeTop = (e) => {
-    e.preventDefault();
-    navigate('/');
-    requestAnimationFrame(goTop);
+    if (link.to === '/') {
+      e.preventDefault();
+      navigate('/');
+      requestAnimationFrame(() => scrollLandingTop());
+      return;
+    }
+
+    scrollLandingTop();
   };
 
   const handleLogout = async () => {
     await logout();
     navigate('/auth/login');
-    goTop();
+    scrollLandingTop();
   };
 
   const dashboardPath = user ? getPostLoginPath(user) : '/auth/login';
@@ -50,7 +56,15 @@ export default function LandingNav() {
       <header className="nav">
         <div className="container nav-container">
           <div className="nav-shell">
-            <Link to="/" className="brand" onClick={goTop}>
+            <Link
+              to="/"
+              className="brand"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/');
+                requestAnimationFrame(() => scrollLandingTop());
+              }}
+            >
               <img src={BRAND.logoSrc} alt="" className="brand-mark" width={38} height={38} />
               <span className="brand-wordmark" aria-hidden="true">
                 <span className="brand-my">MY</span>
@@ -62,8 +76,8 @@ export default function LandingNav() {
               {links.map((l) => (
                 <Link
                   key={`${l.to}-${l.label}`}
-                  to={l.to}
-                  onClick={l.to === '/' ? goHomeTop : goTop}
+                  to={l.hash ? { pathname: l.to, hash: l.hash } : l.to}
+                  onClick={(e) => handleNavClick(e, l)}
                   className={isActive(pathname, l) ? 'active' : undefined}
                 >
                   {l.label}
@@ -73,13 +87,13 @@ export default function LandingNav() {
             <div className="nav-actions">
               {user ? (
                 <>
-                  <Link to={dashboardPath} onClick={goTop} className="nav-login">Dashboard</Link>
+                  <Link to={dashboardPath} onClick={() => scrollLandingTop()} className="nav-login">Dashboard</Link>
                   <button type="button" onClick={handleLogout} className="btn btn-outline nav-join">Log out</button>
                 </>
               ) : (
                 <>
-                  <Link to="/auth/login" onClick={goTop} className="nav-login">Log in</Link>
-                  <Link to="/auth/signup/creator" onClick={goTop} className="btn btn-primary nav-join">Join Now</Link>
+                  <Link to="/auth/login" onClick={() => scrollLandingTop()} className="nav-login">Log in</Link>
+                  <Link to="/auth/signup/creator" onClick={() => scrollLandingTop()} className="btn btn-primary nav-join">Join Now</Link>
                 </>
               )}
             </div>
@@ -93,17 +107,23 @@ export default function LandingNav() {
       </header>
       <div className="mobile-menu">
         {links.map((l) => (
-          <Link key={`${l.to}-${l.label}`} to={l.to} onClick={l.to === '/' ? goHomeTop : goTop}>{l.label}</Link>
+          <Link
+            key={`${l.to}-${l.label}`}
+            to={l.hash ? { pathname: l.to, hash: l.hash } : l.to}
+            onClick={(e) => handleNavClick(e, l)}
+          >
+            {l.label}
+          </Link>
         ))}
         {user ? (
           <>
-            <Link to={dashboardPath} onClick={goTop} className="btn btn-outline btn-block">Dashboard</Link>
+            <Link to={dashboardPath} onClick={() => scrollLandingTop()} className="btn btn-outline btn-block">Dashboard</Link>
             <button type="button" onClick={handleLogout} className="btn btn-primary btn-block">Log out</button>
           </>
         ) : (
           <>
-            <Link to="/auth/login" onClick={goTop} className="btn btn-outline btn-block">Log in</Link>
-            <Link to="/auth/signup/creator" onClick={goTop} className="btn btn-primary btn-block">Join Now</Link>
+            <Link to="/auth/login" onClick={() => scrollLandingTop()} className="btn btn-outline btn-block">Log in</Link>
+            <Link to="/auth/signup/creator" onClick={() => scrollLandingTop()} className="btn btn-primary btn-block">Join Now</Link>
           </>
         )}
       </div>

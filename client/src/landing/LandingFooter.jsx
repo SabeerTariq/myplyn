@@ -1,10 +1,23 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BRAND } from '../config/brand';
+import { scrollLandingTop, scrollToLandingHash } from './useLandingMotion';
 import { BrandLogo } from './LandingLayout';
 
 export default function LandingFooter() {
   const year = new Date().getFullYear();
-  const goTop = () => window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+
+  const goTop = () => scrollLandingTop();
+
+  const goSection = (e, hash) => {
+    e.preventDefault();
+    if (pathname === '/') {
+      scrollToLandingHash(hash);
+      return;
+    }
+    navigate({ pathname: '/', hash });
+  };
 
   return (
     <footer className="footer">
@@ -34,8 +47,8 @@ export default function LandingFooter() {
           <h4>Product</h4>
           <Link to="/how-it-works" onClick={goTop}>How it works</Link>
           <Link to="/pricing" onClick={goTop}>Pricing</Link>
-          <Link to="/" onClick={goTop}>For brands</Link>
-          <Link to="/" onClick={goTop}>For creators</Link>
+          <Link to={{ pathname: '/', hash: '#brands' }} onClick={(e) => goSection(e, '#brands')}>For brands</Link>
+          <Link to={{ pathname: '/', hash: '#creators' }} onClick={(e) => goSection(e, '#creators')}>For creators</Link>
         </div>
         <div className="f-col">
           <h4>Company</h4>
