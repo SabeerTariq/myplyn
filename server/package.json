@@ -6,11 +6,11 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "db:migrate": "node --env-file=../.env node_modules/prisma/build/index.js migrate dev",
-    "db:deploy": "node --env-file=../.env node_modules/prisma/build/index.js migrate deploy",
-    "db:push": "node --env-file=../.env node_modules/prisma/build/index.js db push",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:push": "prisma db push",
     "db:seed": "node --env-file=../.env prisma/seed.js",
-    "db:studio": "node --env-file=../.env node_modules/prisma/build/index.js studio",
+    "db:studio": "prisma studio",
     "db:generate": "prisma generate"
   },
   "dependencies": {
@@ -25,9 +25,7 @@
     "nodemailer": "^6.10.0",
     "stripe": "^17.7.0",
     "uuid": "^11.1.0",
-    "zod": "^3.24.2"
-  },
-  "devDependencies": {
+    "zod": "^3.24.2",
     "prisma": "^6.5.0"
   },
   "prisma": {
