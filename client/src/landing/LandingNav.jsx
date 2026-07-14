@@ -93,7 +93,7 @@ export default function LandingNav() {
               ) : (
                 <>
                   <Link to="/auth/login" onClick={() => scrollLandingTop()} className="nav-login">Log in</Link>
-                  <Link to="/auth/signup/creator" onClick={() => scrollLandingTop()} className="btn btn-primary nav-join">Join Now</Link>
+                  <Link to="/auth/signup" onClick={() => scrollLandingTop()} className="btn btn-primary nav-join">Join Now</Link>
                 </>
               )}
             </div>
@@ -123,7 +123,7 @@ export default function LandingNav() {
         ) : (
           <>
             <Link to="/auth/login" onClick={() => scrollLandingTop()} className="btn btn-outline btn-block">Log in</Link>
-            <Link to="/auth/signup/creator" onClick={() => scrollLandingTop()} className="btn btn-primary btn-block">Join Now</Link>
+            <Link to="/auth/signup" onClick={() => scrollLandingTop()} className="btn btn-primary btn-block">Join Now</Link>
           </>
         )}
       </div>

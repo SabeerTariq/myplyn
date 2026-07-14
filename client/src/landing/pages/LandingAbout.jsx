@@ -326,7 +326,7 @@ export default function LandingAbout() {
               <h3>Ready to join Myplyn?</h3>
               <p>Join thousands of creators and businesses already growing together.</p>
               <div className="hero-cta">
-                <Link to="/auth/signup/creator" className="btn btn-green">Get Started for Free</Link>
+                <Link to="/auth/signup" className="btn btn-green">Get Started for Free</Link>
                 <Link to="/auth/login" className="btn btn-white">Log In</Link>
               </div>
             </div>

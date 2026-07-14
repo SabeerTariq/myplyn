@@ -10,3 +10,13 @@ export function getPostLoginPath(user) {
 export function getLoginPath(role) {
   return role === 'ADMIN' ? '/admin/login' : '/auth/login';
 }
+
+/** Advertiser-intent CTAs (Start a campaign / Start as a Business). */
+export function getAdvertiserStartPath(user) {
+  if (!user) return '/auth/signup/advertiser';
+  if (user.role === 'ADVERTISER') {
+    return user.onboardingDone ? '/advertiser/campaigns/new' : '/advertiser/onboarding';
+  }
+  // Logged-in creator (or other) — offer role choice instead of bouncing into creator onboarding
+  return '/auth/signup';
+}

@@ -8,7 +8,7 @@ import { authenticate } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/error.js';
 import { getOrCreateWallet } from '../services/walletService.js';
 import { issueOtp, verifyOtp } from '../services/otpService.js';
-import { sendOtpEmail } from '../services/mailService.js';
+import { sendOtpEmail, sendPasswordResetEmail } from '../services/mailService.js';
 
 const router = Router();
 
@@ -188,6 +188,14 @@ router.post('/forgot-password', asyncHandler(async (req, res) => {
         resetTokenExpiry: new Date(Date.now() + 3600000),
       },
     });
+
+    const clientUrl = (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/$/, '');
+    const resetUrl = `${clientUrl}/auth/reset-password?token=${resetToken}`;
+    try {
+      await sendPasswordResetEmail({ email: user.email, resetUrl });
+    } catch (err) {
+      console.error('[mail] Failed to send password reset email to', user.email, err.message);
+    }
   }
   res.json({ message: 'If an account exists, a reset link has been sent' });
 }));

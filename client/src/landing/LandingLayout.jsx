@@ -1,5 +1,7 @@
 import { Link, Outlet } from 'react-router-dom';
 import { BRAND } from '../config/brand';
+import { useAuth } from '../hooks/useAuth';
+import { getAdvertiserStartPath } from '../utils/authRedirect';
 import '../styles/landing.css';
 import {
   useLandingMotion, useNavScroll, useMobileMenu, useFaqAccordion, useHeroToggle,
@@ -24,6 +26,9 @@ export default function LandingLayout() {
 }
 
 export function LandingCta({ title, text }) {
+  const { user } = useAuth();
+  const advertiserStartPath = getAdvertiserStartPath(user);
+
   return (
     <section className="section" style={{ paddingTop: 0 }}>
       <div className="container">
@@ -31,7 +36,7 @@ export function LandingCta({ title, text }) {
           <h2>{title}</h2>
           <p>{text}</p>
           <div className="hero-cta">
-            <Link to="/auth/signup/advertiser" className="btn btn-white btn-lg">Start as a brand</Link>
+            <Link to={advertiserStartPath} className="btn btn-white btn-lg">Start as a brand</Link>
             <Link to="/auth/signup/creator" className="btn btn-accent btn-lg">Join as a creator</Link>
           </div>
         </div>

@@ -1,5 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { BRAND, brandEmail } from '../../config/brand';
+import { useAuth } from '../../hooks/useAuth';
+import { getAdvertiserStartPath } from '../../utils/authRedirect';
 
 const CONTACT_ROLE_ROUTES = {
   'Brand / advertiser': '/auth/signup/advertiser',
@@ -8,6 +10,8 @@ const CONTACT_ROLE_ROUTES = {
 
 export default function LandingContact() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const advertiserStartPath = getAdvertiserStartPath(user);
 
   const handleRoleChange = (event) => {
     const route = CONTACT_ROLE_ROUTES[event.target.value];
@@ -64,7 +68,7 @@ export default function LandingContact() {
         <div className="container"><div className="cta-band reveal">
           <h2>Or just dive in</h2>
           <p>You don't need to wait for a reply to get started — create your account in minutes.</p>
-          <div className="hero-cta"><Link to="/auth/signup/advertiser" className="btn btn-white btn-lg">Start as a brand</Link><Link to="/auth/signup/creator" className="btn btn-accent btn-lg">Join as a creator</Link></div>
+          <div className="hero-cta"><Link to={advertiserStartPath} className="btn btn-white btn-lg">Start as a brand</Link><Link to="/auth/signup/creator" className="btn btn-accent btn-lg">Join as a creator</Link></div>
         </div></div>
       </section>
     </>

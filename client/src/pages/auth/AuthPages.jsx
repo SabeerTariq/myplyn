@@ -13,6 +13,7 @@ import AuthPageShell, {
   CreatorSocialButtons,
 } from '../../layouts/AuthLayout';
 import AuthLocationPickers, { getAuthLocationCity } from '../../components/auth/AuthLocationPickers';
+import { OTHERS_NICHE_SLUG } from '../../utils/pageForm';
 
 function PasswordField({ value, onChange, placeholder = 'Enter your password', required = true, minLength }) {
   const [visible, setVisible] = useState(false);
@@ -55,19 +56,6 @@ function cleanSocialLinks(links = {}) {
     Object.entries(links).filter(([, value]) => typeof value === 'string' && value.trim()),
   );
 }
-const CREATOR_NICHES = [
-  'Fashion & Beauty',
-  'Food & Lifestyle',
-  'Technology',
-  'Health & Fitness',
-  'Travel',
-  'Gaming',
-  'Education',
-  'Finance',
-  'Entertainment',
-  'Other',
-];
-
 const EMPTY_PAGE_DRAFT = {
   platformId: '',
   name: '',
@@ -189,7 +177,8 @@ export function SignupFormPage({ role }) {
     state: '',
     city: '',
     customCity: '',
-    niche: '',
+    nicheId: '',
+    customNiche: '',
     bio: '',
     socialLinks: {
       instagram: '',
@@ -212,17 +201,21 @@ export function SignupFormPage({ role }) {
   const otpFromEmail = brandEmail('info');
   const progress = getSignupProgress(role, creatorStep);
 
-  const { data: countries } = useQuery({
-    queryKey: ['countries'],
-    queryFn: () => taxonomyApi.countries().then((r) => r.data.countries),
-    enabled: isCreator || role === 'advertiser',
-  });
-
   const { data: states } = useQuery({
     queryKey: ['states', form.country],
     queryFn: () => taxonomyApi.states(form.country).then((r) => r.data.states),
     enabled: !!form.country,
   });
+
+  const { data: niches } = useQuery({
+    queryKey: ['niches'],
+    queryFn: () => taxonomyApi.niches().then((r) => r.data.niches),
+    enabled: isCreator,
+  });
+
+  const othersNiche = niches?.find((n) => n.slug === OTHERS_NICHE_SLUG);
+  const selectedNiche = niches?.find((n) => n.id === form.nicheId);
+  const isOthersNiche = othersNiche && form.nicheId === othersNiche.id;
 
   const { data: platforms } = useQuery({
     queryKey: ['platforms'],
@@ -281,12 +274,16 @@ export function SignupFormPage({ role }) {
       setError('Select your state or region.');
       return false;
     }
-    if (!form.city.trim()) {
-      setError('Enter your city.');
+    if (!getAuthLocationCity(form)) {
+      setError('Select or enter your city.');
       return false;
     }
-    if (!form.niche) {
+    if (!form.nicheId) {
       setError('Select your primary niche.');
+      return false;
+    }
+    if (isOthersNiche && !form.customNiche.trim()) {
+      setError('Describe your niche when Others is selected.');
       return false;
     }
     return true;
@@ -304,9 +301,18 @@ export function SignupFormPage({ role }) {
     setError('');
     if (!validateProfileStep()) return;
 
+    const nicheLabel = isOthersNiche
+      ? form.customNiche.trim()
+      : (selectedNiche?.name || '');
+
     setLoading(true);
     try {
-      await signup({ ...form, role: 'CREATOR' });
+      await signup({
+        ...form,
+        city: getAuthLocationCity(form),
+        niche: nicheLabel,
+        role: 'CREATOR',
+      });
       setCreatorStep(3);
     } catch (err) {
       setError(err.response?.data?.error || 'Signup failed');
@@ -350,8 +356,9 @@ export function SignupFormPage({ role }) {
     avgReach: 0,
     country: form.country,
     state: form.state || null,
-    city: form.city.trim(),
-    customNiche: form.niche || null,
+    city: getAuthLocationCity(form),
+    nicheId: form.nicheId || null,
+    customNiche: isOthersNiche ? form.customNiche.trim() : null,
   });
 
   const finishCreatorSignup = async (skipPages = false) => {
@@ -480,51 +487,12 @@ export function SignupFormPage({ role }) {
       <p className="auth-section-title">Creator profile</p>
       <p className="auth-section-lead">Help brands understand who you are and where your audience is based.</p>
 
-      <div className="auth-field">
-        <label htmlFor="signup-country">Country</label>
-        <select
-          id="signup-country"
-          className="auth-input select"
-          required
-          value={form.country}
-          onChange={(e) => setForm({ ...form, country: e.target.value, state: '' })}
-        >
-          <option value="">Select country</option>
-          {countries?.map((item) => (
-            <option key={item.code} value={item.code}>{item.name}</option>
-          ))}
-        </select>
-      </div>
-
-      {states?.length > 0 && (
-        <div className="auth-field">
-          <label htmlFor="signup-state">State / region</label>
-          <select
-            id="signup-state"
-            className="auth-input select"
-            required
-            value={form.state}
-            onChange={(e) => setForm({ ...form, state: e.target.value })}
-          >
-            <option value="">Select state or region</option>
-            {states.map((item) => (
-              <option key={item.code} value={item.code}>{item.name}</option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      <div className="auth-field">
-        <label htmlFor="signup-city">City</label>
-        <input
-          id="signup-city"
-          className="auth-input"
-          placeholder="Where are you based?"
-          required
-          value={form.city}
-          onChange={(e) => setForm({ ...form, city: e.target.value })}
-        />
-      </div>
+      <AuthLocationPickers
+        value={form}
+        onChange={(patch) => setForm({ ...form, ...patch })}
+        countryLabel="Country"
+        cityLabel="City"
+      />
 
       <div className="auth-field">
         <label htmlFor="signup-niche">Primary niche</label>
@@ -532,15 +500,36 @@ export function SignupFormPage({ role }) {
           id="signup-niche"
           className="auth-input select"
           required
-          value={form.niche}
-          onChange={(e) => setForm({ ...form, niche: e.target.value })}
+          value={form.nicheId}
+          onChange={(e) => {
+            const next = e.target.value;
+            setForm({
+              ...form,
+              nicheId: next,
+              customNiche: othersNiche && next === othersNiche.id ? form.customNiche : '',
+            });
+          }}
         >
           <option value="">Select your niche</option>
-          {CREATOR_NICHES.map((item) => (
-            <option key={item} value={item}>{item}</option>
+          {niches?.map((item) => (
+            <option key={item.id} value={item.id}>{item.name}</option>
           ))}
         </select>
       </div>
+
+      {isOthersNiche && (
+        <div className="auth-field">
+          <label htmlFor="signup-custom-niche">Describe your niche</label>
+          <input
+            id="signup-custom-niche"
+            className="auth-input"
+            required
+            placeholder="e.g. Pet care, Parenting, Automotive"
+            value={form.customNiche}
+            onChange={(e) => setForm({ ...form, customNiche: e.target.value })}
+          />
+        </div>
+      )}
 
       <div className="auth-field">
         <label htmlFor="signup-bio">About you</label>

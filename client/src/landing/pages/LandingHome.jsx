@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BRAND } from '../../config/brand';
+import { useAuth } from '../../hooks/useAuth';
+import { getAdvertiserStartPath } from '../../utils/authRedirect';
 import {
   FacebookIcon,
   InstagramIcon,
@@ -205,6 +207,9 @@ function DiscoverCreatorsCarousel() {
 }
 
 export default function LandingHome() {
+  const { user } = useAuth();
+  const advertiserStartPath = getAdvertiserStartPath(user);
+
   return (
     <>
 
@@ -690,7 +695,7 @@ export default function LandingHome() {
               <li><span className="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><div><b>Post a brief, let creators apply</b><span>Set requirements and budget once; qualified creators come to you. Approve or decline with a click.</span></div></li>
               <li><span className="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><div><b>Pay only on verified results</b><span>Funds stay held until the creator posts and you approve the proof. No upfront risk.</span></div></li>
             </ul>
-            <Link to="/auth/signup/advertiser" className="btn btn-primary btn-lg">Start a campaign <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></Link>
+            <Link to={advertiserStartPath} className="btn btn-primary btn-lg">Start a campaign <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></Link>
           </div>
           <div className="a-visual reveal d2">
             <div className="mock">
@@ -1062,7 +1067,7 @@ export default function LandingHome() {
                 </li>
               </ul>
 
-              <Link to="/auth/signup/advertiser" className="btn btn-pr-outline pr-btn">
+              <Link to={advertiserStartPath} className="btn btn-pr-outline pr-btn">
                 Start a Campaign
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
               </Link>
@@ -1128,7 +1133,7 @@ export default function LandingHome() {
               <p>Join Myplyn and start getting discovered by businesses looking for creators like you.</p>
             <div className="hero-cta">
                 <Link to="/auth/signup/creator" className="btn btn-green btn-lg">Join as a Creator</Link>
-                <Link to="/auth/signup/advertiser" className="btn btn-white btn-lg">Start as a Business</Link>
+                <Link to={advertiserStartPath} className="btn btn-white btn-lg">Start as a Business</Link>
               </div>
             </div>
             <div className="join-art" aria-hidden="true">

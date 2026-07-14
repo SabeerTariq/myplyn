@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { BRAND, brandEmail } from '../src/config/brand.js';
+import { NICHE_CATALOG } from '../src/data/niches.js';
 
 const prisma = new PrismaClient();
 
@@ -28,15 +29,11 @@ async function main() {
     });
   }
 
-  const niches = [
-    'Fashion', 'Beauty', 'Tech', 'Food', 'Travel', 'Fitness',
-    'Gaming', 'Lifestyle', 'Finance', 'Education', 'Others',
-  ];
-  for (const name of niches) {
+  for (const niche of NICHE_CATALOG) {
     await prisma.niche.upsert({
-      where: { slug: name.toLowerCase() },
-      create: { name, slug: name.toLowerCase() },
-      update: { name },
+      where: { slug: niche.slug },
+      create: { name: niche.name, slug: niche.slug, active: true },
+      update: { name: niche.name, active: true },
     });
   }
 

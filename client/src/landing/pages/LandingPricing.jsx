@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
+import { getAdvertiserStartPath } from '../../utils/authRedirect';
 
 const CheckIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -176,6 +178,9 @@ const faqItems = [
 ];
 
 export default function LandingPricing() {
+  const { user } = useAuth();
+  const advertiserStartPath = getAdvertiserStartPath(user);
+
   return (
     <>
       <section className="pricing-ref-hero">
@@ -362,7 +367,7 @@ export default function LandingPricing() {
               </div>
             </div>
             <div className="pricing-ref-cta-actions">
-              <Link to="/auth/signup/advertiser" className="btn btn-green btn-lg">
+              <Link to={advertiserStartPath} className="btn btn-green btn-lg">
                 Start Your First Campaign
               </Link>
               <Link to="/auth/signup/creator" className="btn btn-outline btn-lg pricing-ref-cta-outline">
