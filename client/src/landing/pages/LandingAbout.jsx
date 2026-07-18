@@ -1,7 +1,39 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BRAND } from '../../config/brand';
+import Modal from '../../components/Modal';
+
+const topicDetails = {
+  business: {
+    title: 'How Myplyn works for businesses',
+    paragraphs: [
+      'Businesses create a campaign brief, choose audience locations, platforms, niches, deliverables, dates, and budget.',
+      'They can discover verified creator pages, review audience and performance details, invite suitable creators, or receive applications.',
+      'Campaign funds are secured before work begins. Content, feedback, proof of publication, approvals, and payment are managed in one collaboration workspace.',
+    ],
+  },
+  creator: {
+    title: 'How Myplyn works for creators',
+    paragraphs: [
+      'Creators build a profile and list their social pages, niches, audience location, reach, followers, and engagement.',
+      'After page review, creators can browse suitable campaigns, submit proposals, or accept invitations from businesses.',
+      'Creators publish approved content, submit proof, and withdraw their earnings after the business verifies the completed work.',
+    ],
+  },
+  platform: {
+    title: 'How the Myplyn platform works',
+    paragraphs: [
+      'Myplyn brings creator discovery, campaign matching, proposals, collaboration, messaging, content review, and payments into one platform.',
+      'Matching tools help businesses and creators find relevant opportunities using platform, niche, location, audience, and campaign requirements.',
+      'A structured approval flow keeps both sides informed from the first invitation through publication, verification, and payout.',
+    ],
+  },
+};
 
 export default function LandingAbout() {
+  const [openTopic, setOpenTopic] = useState(null);
+  const selectedTopic = openTopic ? topicDetails[openTopic] : null;
+
   return (
     <>
       <section className="about-ref-hero">
@@ -129,7 +161,9 @@ export default function LandingAbout() {
                 <li>Find the right creators</li>
                 <li>Track every result</li>
               </ul>
-              <Link to="/how-it-works" className="about-work-link">Learn more →</Link>
+              <button type="button" className="about-work-link" onClick={() => setOpenTopic('business')}>
+                Read more →
+              </button>
             </div>
             <div className="about-work-arrow" aria-hidden="true">→</div>
             <div className="about-work-card about-work-card--creator reveal d1">
@@ -142,7 +176,9 @@ export default function LandingAbout() {
                 <li>Receive campaign offers</li>
                 <li>Get paid securely</li>
               </ul>
-              <Link to="/how-it-works" className="about-work-link">Learn more →</Link>
+              <button type="button" className="about-work-link" onClick={() => setOpenTopic('creator')}>
+                Read more →
+              </button>
             </div>
             <div className="about-work-arrow" aria-hidden="true">→</div>
             <div className="about-work-card about-work-card--platform reveal d2">
@@ -153,7 +189,9 @@ export default function LandingAbout() {
               </div>
               <h3>Myplyn Platform</h3>
               <p>We handle matching, payments, communication, and campaign management—all in one place.</p>
-              <Link to="/how-it-works" className="about-work-link">See how it works →</Link>
+              <button type="button" className="about-work-link" onClick={() => setOpenTopic('platform')}>
+                Read more →
+              </button>
             </div>
           </div>
         </div>
@@ -195,8 +233,8 @@ export default function LandingAbout() {
               <span className="about-why-ico" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20" /></svg>
               </span>
-              <h4>Built for Global Growth</h4>
-              <p>Designed to support creators and businesses worldwide.</p>
+              <h4>Built for Growth in the USA</h4>
+              <p>Designed to support creators and businesses across the United States.</p>
             </article>
           </div>
         </div>
@@ -339,6 +377,22 @@ export default function LandingAbout() {
           </div>
         </div>
       </section>
+
+      <Modal
+        open={!!selectedTopic}
+        onClose={() => setOpenTopic(null)}
+        title={selectedTopic?.title || ''}
+        size="md"
+      >
+        <div className="about-topic-details">
+          {selectedTopic?.paragraphs.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+          <Link to="/how-it-works" className="btn btn-primary" onClick={() => setOpenTopic(null)}>
+            View the complete process
+          </Link>
+        </div>
+      </Modal>
     </>
   );
 }

@@ -54,6 +54,10 @@ export const authApi = {
   changePassword: (data) => api.patch('/auth/change-password', data),
 };
 
+export const contactApi = {
+  send: (data) => api.post('/contact', data),
+};
+
 export const campaignsApi = {
   list: (params) => api.get('/campaigns', { params }),
   get: (id) => api.get(`/campaigns/${id}`),

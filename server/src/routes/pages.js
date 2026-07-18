@@ -4,13 +4,19 @@ import prisma from '../lib/prisma.js';
 import { authenticate, requireRole } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/error.js';
 import { isValidLocation } from '../data/locations.js';
-import { normalizePageInput } from '../services/pageVerificationService.js';
+import { MAX_PAGE_NICHES } from '../data/niches.js';
+import {
+  normalizePageInput,
+  pageInclude,
+  syncPageNiches,
+} from '../services/pageVerificationService.js';
 
 const router = Router();
 router.use(authenticate, requireRole('CREATOR'));
 
 const pageSchema = z.object({
   platformId: z.string().uuid(),
+  nicheIds: z.array(z.string().uuid()).max(MAX_PAGE_NICHES).optional(),
   nicheId: z.preprocess(
     (v) => (v === '' || v === null || v === undefined ? null : v),
     z.string().uuid().nullable().optional(),
@@ -53,7 +59,7 @@ router.get('/', asyncHandler(async (req, res) => {
   const profile = await getCreatorProfile(req);
   const pages = await prisma.creatorPage.findMany({
     where: { creatorId: profile.id },
-    include: { platform: true, niche: true },
+    include: pageInclude,
     orderBy: { createdAt: 'desc' },
   });
   res.json({ pages });
@@ -64,8 +70,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
   const page = await prisma.creatorPage.findFirst({
     where: { id: req.params.id, creatorId: profile.id },
     include: {
-      platform: true,
-      niche: true,
+      ...pageInclude,
       collaborations: { include: { campaign: true } },
     },
   });
@@ -82,21 +87,30 @@ router.post('/', asyncHandler(async (req, res) => {
   }
 
   const data = await normalizePageInput(parsed);
+  const { nicheIds, ...pageData } = data;
 
   const page = await prisma.creatorPage.create({
-    data: { ...data, creatorId: profile.id },
-    include: { platform: true, niche: true },
+    data: { ...pageData, creatorId: profile.id },
+    include: pageInclude,
+  });
+
+  await syncPageNiches(page.id, nicheIds);
+
+  const fullPage = await prisma.creatorPage.findUnique({
+    where: { id: page.id },
+    include: pageInclude,
   });
 
   await queuePageReview(page.id);
 
-  res.status(201).json({ page });
+  res.status(201).json({ page: fullPage });
 }));
 
 router.patch('/:id', asyncHandler(async (req, res) => {
   const profile = await getCreatorProfile(req);
   const existing = await prisma.creatorPage.findFirst({
     where: { id: req.params.id, creatorId: profile.id },
+    include: { niches: true },
   });
   if (!existing) return res.status(404).json({ error: 'Page not found' });
 
@@ -110,8 +124,14 @@ router.patch('/:id', asyncHandler(async (req, res) => {
     }
   }
 
+  const existingNicheIds = existing.niches?.map((entry) => entry.nicheId).filter(Boolean)
+    || (existing.nicheId ? [existing.nicheId] : []);
+
   const data = await normalizePageInput({
     platformId: parsed.platformId ?? existing.platformId,
+    nicheIds: parsed.nicheIds ?? (parsed.nicheId !== undefined
+      ? (parsed.nicheId ? [parsed.nicheId] : [])
+      : existingNicheIds),
     nicheId: parsed.nicheId !== undefined ? parsed.nicheId : existing.nicheId,
     customNiche: parsed.customNiche !== undefined ? parsed.customNiche : existing.customNiche,
     name: parsed.name ?? existing.name,
@@ -124,20 +144,29 @@ router.patch('/:id', asyncHandler(async (req, res) => {
     city: parsed.city ?? existing.city,
   });
 
+  const { nicheIds, ...pageData } = data;
+
   const page = await prisma.creatorPage.update({
     where: { id: req.params.id },
     data: {
-      ...data,
+      ...pageData,
       verificationStatus: 'PENDING',
       adminVerifiedAt: null,
       adminNotes: null,
     },
-    include: { platform: true, niche: true },
+    include: pageInclude,
+  });
+
+  await syncPageNiches(page.id, nicheIds);
+
+  const fullPage = await prisma.creatorPage.findUnique({
+    where: { id: page.id },
+    include: pageInclude,
   });
 
   await queuePageReview(page.id);
 
-  res.json({ page });
+  res.json({ page: fullPage });
 }));
 
 router.delete('/:id', asyncHandler(async (req, res) => {

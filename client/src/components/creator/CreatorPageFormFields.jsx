@@ -5,7 +5,7 @@ import NicheSelect, { getNichePayload } from './NicheSelect';
 import { taxonomyApi } from '../../services/api';
 
 const EMPTY_LOCATION = { country: '', state: '', city: '', customCity: '' };
-const EMPTY_NICHE = { nicheId: '', customNiche: '' };
+const EMPTY_NICHE = { nicheIds: [], customNiche: '' };
 
 export function buildPageFormState(page) {
   if (!page) {
@@ -23,7 +23,11 @@ export function buildPageFormState(page) {
 
   return {
     platformId: page.platformId || '',
-    niche: { nicheId: page.nicheId || '', customNiche: page.customNiche || '' },
+    niche: {
+      nicheIds: page.niches?.map((entry) => entry.nicheId || entry.niche?.id).filter(Boolean)
+        || (page.nicheId ? [page.nicheId] : []),
+      customNiche: page.customNiche || '',
+    },
     location: {
       country: page.country || '',
       state: page.state || '',

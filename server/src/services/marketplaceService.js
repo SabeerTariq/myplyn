@@ -1,3 +1,5 @@
+import { getPageNicheIds } from './pageVerificationService.js';
+
 function parseJsonList(value) {
   if (!value) return [];
   if (Array.isArray(value)) return value;
@@ -43,7 +45,8 @@ export function scoreCampaignMatch(campaign, creatorPages = [], appliedCampaignI
       pageScore += 30;
       pageReasons.push('Platform match');
     }
-    if (campaignNicheIds.length === 0 || (page.nicheId && campaignNicheIds.includes(page.nicheId))) {
+    const pageNicheIds = getPageNicheIds(page);
+    if (campaignNicheIds.length === 0 || pageNicheIds.some((id) => campaignNicheIds.includes(id))) {
       pageScore += 25;
       pageReasons.push('Niche match');
     }
@@ -213,7 +216,8 @@ export function scoreCreatorMatch(page, advertiserCampaigns = []) {
       campaignScore += 30;
       uniqueReasons.add('Platform match');
     }
-    if (campaignNicheIds.length === 0 || (page.nicheId && campaignNicheIds.includes(page.nicheId))) {
+    const pageNicheIds = getPageNicheIds(page);
+    if (campaignNicheIds.length === 0 || pageNicheIds.some((id) => campaignNicheIds.includes(id))) {
       campaignScore += 25;
       uniqueReasons.add('Niche match');
     }
@@ -285,7 +289,18 @@ export function buildCreatorWhere(query) {
   if (country) where.country = country;
   if (city) where.city = city;
   if (platformId) where.platformId = String(platformId);
-  if (nicheId) where.nicheId = String(nicheId);
+  if (nicheId) {
+    const nicheFilter = String(nicheId);
+    where.AND = [
+      ...(where.AND || []),
+      {
+        OR: [
+          { nicheId: nicheFilter },
+          { niches: { some: { nicheId: nicheFilter } } },
+        ],
+      },
+    ];
+  }
   if (minFollowers) where.followers = { gte: parseInt(minFollowers, 10) };
 
   if (q) {

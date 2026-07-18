@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Icon from '../Icon';
 
 export default function AuthPickerModal({
@@ -9,12 +10,30 @@ export default function AuthPickerModal({
   value,
   onSelect,
   placeholder = 'Search…',
+  searchable = false,
 }) {
   const [query, setQuery] = useState('');
 
   useEffect(() => {
     if (!open) setQuery('');
   }, [open]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open, onClose]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -24,7 +43,7 @@ export default function AuthPickerModal({
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className="auth-picker-overlay" role="presentation" onClick={onClose}>
       <div
         className="auth-picker-sheet"
@@ -40,7 +59,7 @@ export default function AuthPickerModal({
           </button>
         </div>
 
-        {options.length > 8 && (
+        {(searchable || options.length > 8) && (
           <div className="auth-picker-search-wrap">
             <Icon name="search" size={18} />
             <input
@@ -49,6 +68,7 @@ export default function AuthPickerModal({
               placeholder={placeholder}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              autoFocus
             />
           </div>
         )}
@@ -74,6 +94,7 @@ export default function AuthPickerModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -348,3 +348,64 @@ export async function sendLeadEmail({ fullName, phone, source, subject }) {
     ].join('\n'),
   });
 }
+
+export async function sendContactEmail({
+  firstName,
+  lastName,
+  email,
+  role,
+  subject,
+  message,
+}) {
+  const transport = getTransporter();
+  const to = process.env.CONTACT_EMAIL || process.env.LEAD_EMAIL || 'info@myplyn.com';
+  const from = process.env.EMAIL_FROM || `Myplyn <${process.env.SMTP_USER || 'info@myplyn.com'}>`;
+  const fullName = `${firstName} ${lastName}`.trim();
+  const sentAt = formatLeadDate(new Date());
+
+  if (!transport) {
+    const err = new Error('Email service is not configured on the server');
+    err.status = 503;
+    throw err;
+  }
+
+  const safe = {
+    fullName: escapeHtml(fullName),
+    email: escapeHtml(email),
+    role: escapeHtml(role),
+    subject: escapeHtml(subject),
+    message: escapeHtml(message).replace(/\n/g, '<br />'),
+    sentAt: escapeHtml(sentAt),
+  };
+
+  await transport.sendMail({
+    from,
+    to,
+    replyTo: email,
+    subject: `Myplyn contact — ${subject}`,
+    html: `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;color:#0A1F44;padding:24px;">
+      <h2 style="color:#00B86B;margin:0 0 20px;">New website contact</h2>
+      <p><strong>Name:</strong> ${safe.fullName}</p>
+      <p><strong>Email:</strong> ${safe.email}</p>
+      <p><strong>Contact type:</strong> ${safe.role}</p>
+      <p><strong>Subject:</strong> ${safe.subject}</p>
+      <p><strong>Received:</strong> ${safe.sentAt}</p>
+      <hr style="border:none;border-top:1px solid #E8EDF3;margin:20px 0" />
+      <p><strong>Message</strong></p>
+      <p style="background:#F8FAFC;padding:14px;border-radius:8px;line-height:1.6;">${safe.message}</p>
+    </body></html>`,
+    text: [
+      'New website contact',
+      '',
+      `Name: ${fullName}`,
+      `Email: ${email}`,
+      `Contact type: ${role}`,
+      `Subject: ${subject}`,
+      `Received: ${sentAt}`,
+      '',
+      message,
+    ].join('\n'),
+  });
+
+  return true;
+}

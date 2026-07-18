@@ -11,6 +11,7 @@ import PageHeader from '../../components/PageHeader';
 import ListOrEmpty from '../../components/ListOrEmpty';
 import Modal, { ConfirmModal } from '../../components/Modal';
 import { adminApi } from '../../services/api';
+import { displayPageNiche } from '../../utils/pageForm';
 import { BRAND } from '../../config/brand';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -303,7 +304,7 @@ export function AdminReviewQueue() {
               <div className="cr-verify-row"><dt>Page</dt><dd><strong>{selected.page.name}</strong></dd></div>
               <div className="cr-verify-row"><dt>Creator</dt><dd>{selected.page.creator?.user?.email || '—'}</dd></div>
               <div className="cr-verify-row"><dt>Platform</dt><dd>{selected.page.platform?.name}</dd></div>
-              <div className="cr-verify-row"><dt>Niche</dt><dd>{selected.page.niche?.slug === 'others' && selected.page.customNiche ? selected.page.customNiche : (selected.page.niche?.name || selected.page.customNiche || '—')}</dd></div>
+              <div className="cr-verify-row"><dt>Niche</dt><dd>{displayPageNiche(selected.page)}</dd></div>
               <div className="cr-verify-row"><dt>Location</dt><dd>{[selected.page.city, selected.page.state, selected.page.country].filter(Boolean).join(', ') || '—'}</dd></div>
               <div className="cr-verify-row"><dt>Followers</dt><dd>{selected.page.followers?.toLocaleString()}</dd></div>
               <div className="cr-verify-row"><dt>Avg reach</dt><dd>{selected.page.avgReach?.toLocaleString()}</dd></div>

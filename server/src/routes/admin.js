@@ -152,6 +152,7 @@ router.get('/review-queue', requirePermission('review.read'), asyncHandler(async
         include: {
           platform: true,
           niche: true,
+          niches: { include: { niche: true } },
           creator: { include: { user: true } },
         },
       });
@@ -210,7 +211,7 @@ router.post('/pages/:id/verify', requirePermission('review.write'), asyncHandler
 
   const existing = await prisma.creatorPage.findUnique({
     where: { id: req.params.id },
-    include: { creator: true, platform: true, niche: true },
+    include: { creator: true, platform: true, niche: true, niches: { include: { niche: true } } },
   });
   if (!existing) return res.status(404).json({ error: 'Page not found' });
 
@@ -221,7 +222,7 @@ router.post('/pages/:id/verify', requirePermission('review.write'), asyncHandler
       adminVerifiedAt: new Date(),
       adminNotes: notes,
     },
-    include: { platform: true, niche: true, creator: { include: { user: true } } },
+    include: { platform: true, niche: true, niches: { include: { niche: true } }, creator: { include: { user: true } } },
   });
 
   await createNotification(

@@ -219,6 +219,7 @@ model Niche {
   createdAt DateTime @default(now()) @map("created_at")
 
   pages            CreatorPage[]
+  pageNiches       CreatorPageNiche[]
   campaignNiches   CampaignNiche[]
 
   @@map("niches")
@@ -260,7 +261,8 @@ model CreatorPage {
 
   creator       CreatorProfile @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   platform      Platform       @relation(fields: [platformId], references: [id])
-  niche         Niche?         @relation(fields: [nicheId], references: [id])
+  niche         Niche?              @relation(fields: [nicheId], references: [id])
+  niches        CreatorPageNiche[]
   applications  CampaignApplication[]
   invitations   CollaborationInvitation[]
   collaborations Collaboration[]
@@ -307,6 +309,17 @@ model CampaignTargeting {
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@map("campaign_targeting")
+}
+
+model CreatorPageNiche {
+  pageId  String @map("page_id")
+  nicheId String @map("niche_id")
+
+  page  CreatorPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  niche Niche       @relation(fields: [nicheId], references: [id])
+
+  @@id([pageId, nicheId])
+  @@map("creator_page_niches")
 }
 
 model CampaignNiche {

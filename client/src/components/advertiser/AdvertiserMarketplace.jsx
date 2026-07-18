@@ -5,6 +5,7 @@ import Icon from '../Icon';
 import Select from '../Select';
 import { PageIdentity } from '../creator/creatorUi';
 import { formatCount, formatMoney } from '../../utils/creatorMetrics';
+import { displayPageNiche } from '../../utils/pageForm';
 import { getPageNumbers } from '../../utils/pagination';
 import { campaignsApi, marketplaceApi, taxonomyApi } from '../../services/api';
 import '../../styles/marketplace.css';
@@ -508,7 +509,9 @@ export default function AdvertiserMarketplace() {
             </div>
           ) : (
             <div className="mp-list">
-              {creators.map((creator) => (
+              {creators.map((creator) => {
+                const nicheLabel = displayPageNiche(creator);
+                return (
                 <article
                   key={creator.id}
                   className={`mp-job-card mp-creator-card ${selectedId === creator.id ? 'selected' : ''}`}
@@ -523,8 +526,8 @@ export default function AdvertiserMarketplace() {
                       {creator.country && (
                         <span><Icon name="location_on" size={14} /> {creator.city ? `${creator.city}, ` : ''}{creator.country}</span>
                       )}
-                      {creator.niche?.name && (
-                        <span><Icon name="category" size={14} /> {creator.niche.name}</span>
+                      {nicheLabel !== '—' && (
+                        <span><Icon name="category" size={14} /> {nicheLabel}</span>
                       )}
                       {creator.engagement > 0 && (
                         <span><Icon name="trending_up" size={14} /> {Number(creator.engagement).toFixed(1)}% eng.</span>
@@ -540,7 +543,8 @@ export default function AdvertiserMarketplace() {
                     </div>
                   </div>
                 </article>
-              ))}
+                );
+              })}
             </div>
           )}
 

@@ -196,7 +196,7 @@ async function main() {
   const instagram = await prisma.platform.findUnique({ where: { slug: 'instagram' } });
   const tiktok = await prisma.platform.findUnique({ where: { slug: 'tiktok' } });
   const fashionNiche = await prisma.niche.findUnique({ where: { slug: 'fashion' } });
-  const foodNiche = await prisma.niche.findUnique({ where: { slug: 'food' } });
+  const foodNiche = await prisma.niche.findUnique({ where: { slug: 'food-cooking' } });
   const gamingNiche = await prisma.niche.findUnique({ where: { slug: 'gaming' } });
 
   const page1 = await prisma.creatorPage.upsert({

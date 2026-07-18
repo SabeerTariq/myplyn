@@ -238,9 +238,11 @@ export function useHeroToggle() {
 }
 
 export function useFaqAccordion() {
+  const { pathname } = useLocation();
+
   useEffect(() => {
     const handlers = [];
-    document.querySelectorAll('.landing-site .qa').forEach((qa) => {
+    document.querySelectorAll('.landing-site .qa:not([data-controlled])').forEach((qa) => {
       const btn = qa.querySelector('button');
       const ans = qa.querySelector('.ans');
       const handler = () => {
@@ -258,7 +260,7 @@ export function useFaqAccordion() {
       handlers.push({ btn, handler });
     });
     return () => handlers.forEach(({ btn, handler }) => btn.removeEventListener('click', handler));
-  }, []);
+  }, [pathname]);
 }
 
 export function useNavScroll() {

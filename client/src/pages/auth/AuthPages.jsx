@@ -13,6 +13,7 @@ import AuthPageShell, {
   CreatorSocialButtons,
 } from '../../layouts/AuthLayout';
 import AuthLocationPickers, { getAuthLocationCity } from '../../components/auth/AuthLocationPickers';
+import CreatorPagesListEditor, { validatePagesList } from '../../components/creator/CreatorPagesListEditor';
 import { OTHERS_NICHE_SLUG } from '../../utils/pageForm';
 
 function PasswordField({ value, onChange, placeholder = 'Enter your password', required = true, minLength }) {
@@ -56,13 +57,6 @@ function cleanSocialLinks(links = {}) {
     Object.entries(links).filter(([, value]) => typeof value === 'string' && value.trim()),
   );
 }
-const EMPTY_PAGE_DRAFT = {
-  platformId: '',
-  name: '',
-  url: '',
-  followers: '',
-};
-
 function getSignupProgress(role, creatorStep) {
   if (role === 'creator') {
     const labels = ['Account', 'Profile', 'Your pages'];
@@ -190,7 +184,6 @@ export function SignupFormPage({ role }) {
     },
   });
   const [pages, setPages] = useState([]);
-  const [pageDraft, setPageDraft] = useState({ ...EMPTY_PAGE_DRAFT });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -216,12 +209,6 @@ export function SignupFormPage({ role }) {
   const othersNiche = niches?.find((n) => n.slug === OTHERS_NICHE_SLUG);
   const selectedNiche = niches?.find((n) => n.id === form.nicheId);
   const isOthersNiche = othersNiche && form.nicheId === othersNiche.id;
-
-  const { data: platforms } = useQuery({
-    queryKey: ['platforms'],
-    queryFn: () => taxonomyApi.platforms().then((r) => r.data.platforms),
-    enabled: isCreator && creatorStep === 3,
-  });
 
   useEffect(() => {
     if (!otpCooldown) return undefined;
@@ -321,33 +308,6 @@ export function SignupFormPage({ role }) {
     }
   };
 
-  const handleAddPage = () => {
-    setError('');
-    if (!pageDraft.platformId || !pageDraft.name.trim() || !pageDraft.url.trim() || !pageDraft.followers) {
-      setError('Fill in platform, page name, profile URL, and followers to add a page.');
-      return;
-    }
-
-    const followers = Number(pageDraft.followers);
-    if (!Number.isFinite(followers) || followers < 0) {
-      setError('Enter a valid follower count.');
-      return;
-    }
-
-    const platformName = platforms?.find((p) => p.id === pageDraft.platformId)?.name || 'Page';
-    setPages((current) => [
-      ...current,
-      {
-        ...pageDraft,
-        name: pageDraft.name.trim(),
-        url: pageDraft.url.trim(),
-        followers: String(followers),
-        platformName,
-      },
-    ]);
-    setPageDraft({ ...EMPTY_PAGE_DRAFT });
-  };
-
   const buildSignupPagePayload = (page) => ({
     platformId: page.platformId,
     name: page.name,
@@ -366,8 +326,9 @@ export function SignupFormPage({ role }) {
     setError('');
     try {
       if (!skipPages) {
-        if (pages.length === 0) {
-          setError('Add at least one page, or choose Skip for now.');
+        const pagesError = validatePagesList(pages);
+        if (pagesError) {
+          setError(pagesError);
           setLoading(false);
           return;
         }
@@ -547,88 +508,10 @@ export function SignupFormPage({ role }) {
   );
 
   const creatorPagesStep = (
-    <div className="auth-creator-section">
+    <div className="auth-creator-section cr-onboarding-pages-form">
       <p className="auth-section-title">List your pages</p>
-      <p className="auth-section-lead">Add the social pages you want to monetize. You can add more later from your dashboard.</p>
-
-      {pages.length > 0 && (
-        <div className="auth-page-list">
-          {pages.map((page, index) => (
-            <div key={`${page.platformId}-${page.url}-${index}`} className="auth-page-card">
-              <div className="auth-page-card-info">
-                <strong>{page.name}</strong>
-                <span>{page.platformName} · {Number(page.followers).toLocaleString()} followers</span>
-              </div>
-              <button
-                type="button"
-                className="auth-page-remove"
-                onClick={() => setPages((current) => current.filter((_, i) => i !== index))}
-                aria-label={`Remove ${page.name}`}
-              >
-                <Icon name="close" size={18} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="auth-page-draft">
-        <div className="auth-field">
-          <label htmlFor="signup-page-platform">Platform</label>
-          <select
-            id="signup-page-platform"
-            className="auth-input select"
-            value={pageDraft.platformId}
-            onChange={(e) => setPageDraft({ ...pageDraft, platformId: e.target.value })}
-          >
-            <option value="">Select platform</option>
-            {platforms?.map((item) => (
-              <option key={item.id} value={item.id}>{item.name}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="auth-field">
-          <label htmlFor="signup-page-name">Page name</label>
-          <input
-            id="signup-page-name"
-            className="auth-input"
-            placeholder="@yourhandle or channel name"
-            value={pageDraft.name}
-            onChange={(e) => setPageDraft({ ...pageDraft, name: e.target.value })}
-          />
-        </div>
-
-        <div className="auth-field">
-          <label htmlFor="signup-page-url">Profile URL</label>
-          <input
-            id="signup-page-url"
-            type="url"
-            className="auth-input"
-            placeholder="https://instagram.com/yourpage"
-            value={pageDraft.url}
-            onChange={(e) => setPageDraft({ ...pageDraft, url: e.target.value })}
-          />
-        </div>
-
-        <div className="auth-field">
-          <label htmlFor="signup-page-followers">Followers</label>
-          <input
-            id="signup-page-followers"
-            type="number"
-            min="0"
-            className="auth-input"
-            placeholder="e.g. 25000"
-            value={pageDraft.followers}
-            onChange={(e) => setPageDraft({ ...pageDraft, followers: e.target.value })}
-          />
-        </div>
-
-        <button type="button" className="auth-add-page-btn" onClick={handleAddPage}>
-          <Icon name="add" size={18} />
-          Add page
-        </button>
-      </div>
+      <p className="auth-section-lead">Select your platforms and add each page name and profile link. You can add more later from your dashboard.</p>
+      <CreatorPagesListEditor pages={pages} onChange={setPages} />
     </div>
   );
 

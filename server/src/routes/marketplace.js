@@ -54,7 +54,7 @@ router.get('/', authenticate, asyncHandler(async (req, res) => {
     const creator = await prisma.creatorProfile.findUnique({
       where: { userId: req.user.id },
       include: {
-        pages: { include: { platform: true, niche: true } },
+        pages: { include: { platform: true, niche: true, niches: { include: { niche: true } } } },
       },
     });
     creatorPages = creator?.pages || [];
@@ -206,7 +206,7 @@ router.get('/creators', authenticate, requireRole('ADVERTISER'), asyncHandler(as
 
   const allCreators = await prisma.creatorPage.findMany({
     where,
-    include: { platform: true, niche: true, creator: { include: { user: true } } },
+    include: { platform: true, niche: true, niches: { include: { niche: true } }, creator: { include: { user: true } } },
     orderBy: { createdAt: 'desc' },
   });
 
@@ -437,7 +437,7 @@ router.get('/proposals', authenticate, requireRole('ADVERTISER'), asyncHandler(a
     where: { campaign: { advertiserId: adv.id } },
     include: {
       campaign: { include: { advertiser: true, platforms: { include: { platform: true } } } },
-      page: { include: { platform: true, niche: true, creator: { include: { user: true } } } },
+      page: { include: { platform: true, niche: true, niches: { include: { niche: true } }, creator: { include: { user: true } } } },
     },
     orderBy: { createdAt: 'desc' },
   });

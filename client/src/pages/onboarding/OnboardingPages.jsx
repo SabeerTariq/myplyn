@@ -5,7 +5,11 @@ import { authApi, pagesApi } from '../../services/api';
 import WizardStepper from '../../components/WizardStepper';
 import BrandMark from '../../components/BrandMark';
 import Icon from '../../components/Icon';
-import CreatorPageFormFields, { buildPageFormState, buildPagePayload } from '../../components/creator/CreatorPageFormFields';
+import CreatorOnboardingPagesForm, {
+  buildOnboardingPagesFormState,
+  buildPagePayloadFromOnboarding,
+  validateOnboardingPagesForm,
+} from '../../components/creator/CreatorOnboardingPagesForm';
 import { BRAND } from '../../config/brand';
 import '../../styles/onboarding.css';
 import '../../styles/creator-home.css';
@@ -161,7 +165,7 @@ export function AdvertiserOnboarding() {
 
 export function CreatorOnboarding() {
   const [step, setStep] = useState(1);
-  const [pageForm, setPageForm] = useState(buildPageFormState());
+  const [pageForm, setPageForm] = useState(buildOnboardingPagesFormState());
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { updateUser } = useAuth();
@@ -170,29 +174,44 @@ export function CreatorOnboarding() {
 
   const persist = (done) => authApi.updateOnboarding({ step, done }).catch(() => {});
 
-  const isPageStarted = pageForm.platformId || pageForm.name || pageForm.url || pageForm.followers;
+  const hasPageData = pageForm.pages.some(
+    (page) => page.platformId || page.name || page.url || page.followers,
+  );
 
-  const submitPage = async () => {
+  const submitPages = async () => {
+    const validationError = validateOnboardingPagesForm(pageForm);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     setLoading(true);
     setError('');
     try {
-      await pagesApi.create(buildPagePayload(pageForm));
+      const pagesToCreate = pageForm.pages.filter(
+        (page) => page.platformId && page.name.trim() && page.url.trim(),
+      );
+
+      for (const page of pagesToCreate) {
+        await pagesApi.create(buildPagePayloadFromOnboarding(pageForm, page));
+      }
+
       await persist(false);
       setStep(2);
     } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Could not submit your page.');
+      setError(err.response?.data?.error || err.message || 'Could not submit your pages.');
     } finally {
       setLoading(false);
     }
   };
 
   const handlePageContinue = () => {
-    if (!isPageStarted) {
+    if (!hasPageData) {
       setStep(2);
       persist(false);
       return;
     }
-    submitPage();
+    submitPages();
   };
 
   const finish = async () => {
@@ -219,10 +238,10 @@ export function CreatorOnboarding() {
             <div>
               <StepIntro
                 icon="add_photo_alternate"
-                title="List your first page"
-                lead="Add a social page so brands can discover you. It goes to admin review, then appears in the marketplace."
+                title="List your pages"
+                lead="Select your platforms, add page names and profile links, and tell us where your audience is based."
               />
-              <CreatorPageFormFields form={pageForm} setForm={setPageForm} error={error} />
+              <CreatorOnboardingPagesForm form={pageForm} setForm={setPageForm} error={error} />
               <StepFooter
                 step={step}
                 totalSteps={total}

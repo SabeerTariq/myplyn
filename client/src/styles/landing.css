@@ -2059,12 +2059,15 @@ body.landing-active{margin:0;font-family:var(--font-body);color:var(--ink);backg
 }
 .about-work-link{
   margin-top:auto;padding-top:4px;font-size:.84rem;font-weight:700;text-decoration:none;
-  transition:opacity .2s;
+  transition:opacity .2s;background:none;border:0;text-align:left;cursor:pointer;font-family:inherit;
 }
 .about-work-link:hover{opacity:.8}
 .about-work-card--business .about-work-link{color:var(--brand-green)}
 .about-work-card--creator .about-work-link{color:#7C3AED}
 .about-work-card--platform .about-work-link{color:#2563EB}
+.about-topic-details{display:grid;gap:14px}
+.about-topic-details p{margin:0;color:var(--slate-600);line-height:1.7}
+.about-topic-details .btn{justify-self:start;margin-top:6px}
 
 .about-why{padding-top:0;padding-bottom:28px}
 .about-why .section-head{margin-bottom:14px}
@@ -2197,11 +2200,17 @@ body.landing-active{margin:0;font-family:var(--font-body);color:var(--ink);backg
 .contact-side{display:flex;flex-direction:column;gap:18px}
 .ci{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--line);
   border-radius:var(--r-lg);padding:20px;box-shadow:var(--e1)}
+.ci-button{width:100%;font:inherit;color:inherit;text-align:left;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.ci-button:hover{transform:translateY(-2px);box-shadow:var(--e2)}
 .ci .ci-ico{flex:none;width:44px;height:44px;border-radius:12px;background:var(--indigo-50);
   color:var(--indigo-500);display:grid;place-items:center}
 .ci .ci-ico svg{width:22px;height:22px}
 .ci b{display:block;margin-bottom:3px}
 .ci span{color:var(--slate-500);font-size:.92rem}
+.contact-privacy-note{margin:0;color:var(--slate-500);font-size:.78rem;line-height:1.5}
+.contact-form-status{margin:0;padding:10px 12px;border-radius:10px;font-size:.86rem;font-weight:600}
+.contact-form-status--success{color:#087443;background:#ecfdf3;border:1px solid #bbf7d0}
+.contact-form-status--error{color:#b42318;background:#fef3f2;border:1px solid #fecaca}
 
 /* ---------- reveal animations ---------- */
 html.landing-active.js .landing-site .reveal{opacity:0;transform:translateY(30px)}

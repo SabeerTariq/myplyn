@@ -862,6 +862,177 @@
   line-height: 1.5;
 }
 
+.cr-picker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-1);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.cr-picker-trigger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cr-picker-trigger-placeholder {
+  color: var(--text-3);
+}
+
+.cr-picker-trigger-value {
+  color: var(--text-1);
+}
+
+.cr-platform-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.cr-platform-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--text-2);
+  cursor: pointer;
+  user-select: none;
+}
+
+.cr-platform-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cr-platform-option--checked {
+  border-color: color-mix(in oklch, var(--brand) 45%, var(--border));
+  background: color-mix(in oklch, var(--brand) 8%, white);
+  color: var(--text-1);
+}
+
+.cr-onboarding-page-list {
+  display: grid;
+  gap: 12px;
+}
+
+.cr-onboarding-page-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  background: color-mix(in oklch, var(--surface) 92%, white);
+}
+
+.cr-onboarding-page-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cr-onboarding-page-card-head strong {
+  font-size: 14px;
+}
+
+.cr-onboarding-page-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+}
+
+.cr-onboarding-page-remove:hover {
+  background: color-mix(in oklch, var(--bad) 8%, white);
+  color: var(--bad);
+}
+
+.cr-onboarding-add-page {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cr-onboarding-add-page:hover {
+  border-color: color-mix(in oklch, var(--brand) 40%, var(--border));
+  color: var(--brand);
+}
+
+.cr-onboarding-empty-hint {
+  margin-top: 8px;
+}
+
+.cr-onboarding-pages-form .cr-form-section + .cr-form-section {
+  margin-top: 20px;
+}
+
+.cr-niche-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.cr-niche-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--text-2);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.cr-niche-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cr-niche-option--checked {
+  border-color: color-mix(in oklch, var(--brand) 45%, var(--border));
+  background: color-mix(in oklch, var(--brand) 8%, white);
+  color: var(--text-1);
+}
+
+.cr-niche-option--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .cr-form-error {
   margin: 0;
   padding: 12px 14px;

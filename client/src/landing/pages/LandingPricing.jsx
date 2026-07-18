@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getAdvertiserStartPath } from '../../utils/authRedirect';
@@ -33,7 +34,7 @@ const pricingSteps = [
     ),
     title: 'Set your campaign budget',
     text: 'You decide how much you want to invest.',
-    chips: ['₪500', '₪2,000', '₪10,000', '₪50,000+'],
+    chips: ['$500', '$2,000', '$10,000', '$50,000+'],
   },
   {
     num: 3,
@@ -51,10 +52,10 @@ const pricingSteps = [
 ];
 
 const feeRows = [
-  { budget: '₪1,000', fee: '₪100 – ₪200', total: '₪1,100 – ₪1,200' },
-  { budget: '₪5,000', fee: '₪500 – ₪1,000', total: '₪5,500 – ₪6,000' },
-  { budget: '₪10,000', fee: '₪1,000 – ₪2,000', total: '₪11,000 – ₪12,000' },
-  { budget: '₪50,000', fee: '₪5,000 – ₪10,000', total: '₪55,000 – ₪60,000' },
+  { budget: '$1,000', fee: '$100 – $200', total: '$1,100 – $1,200' },
+  { budget: '$5,000', fee: '$500 – $1,000', total: '$5,500 – $6,000' },
+  { budget: '$10,000', fee: '$1,000 – $2,000', total: '$11,000 – $12,000' },
+  { budget: '$50,000', fee: '$5,000 – $10,000', total: '$55,000 – $60,000' },
 ];
 
 const creatorBenefits = [
@@ -175,11 +176,36 @@ const faqItems = [
     q: 'Can I cancel a campaign?',
     a: 'Yes. You can cancel a campaign before it goes live. If work has not been completed or approved, held funds are returned to your account.',
   },
+  {
+    q: 'How and when do creators get paid?',
+    a: 'Campaign funds are secured before work begins. After the advertiser approves the published content and its proof, the creator’s earnings become available for payout.',
+  },
+  {
+    q: 'What payment methods are supported?',
+    a: 'Businesses can fund campaigns through the payment methods available in their account. Creators connect a supported payout account to withdraw verified earnings.',
+  },
+  {
+    q: 'What happens if the content needs changes?',
+    a: 'The advertiser can request changes before approval. The creator receives the feedback in the collaboration workspace and can submit a revised version for review.',
+  },
+  {
+    q: 'Are creators verified?',
+    a: 'Creator pages are reviewed before they are marked as verified and shown as verified in the marketplace. Businesses can also review audience details, engagement, and campaign history.',
+  },
+  {
+    q: 'Is Myplyn available in the USA?',
+    a: 'Yes. Myplyn serves businesses and creators in the United States, with location targeting for countries, states, regions, and cities.',
+  },
+  {
+    q: 'Can I contact support before paying?',
+    a: 'Yes. Use the contact form or Live Chat for questions about campaign setup, pricing, creator onboarding, or payments before you launch.',
+  },
 ];
 
 export default function LandingPricing() {
   const { user } = useAuth();
   const advertiserStartPath = getAdvertiserStartPath(user);
+  const [openFaq, setOpenFaq] = useState(null);
 
   return (
     <>
@@ -329,9 +355,16 @@ export default function LandingPricing() {
             <h2 className="h2">Frequently asked questions</h2>
           </div>
           <div className="pricing-ref-faq-grid reveal d1">
-            {faqItems.map((item) => (
-              <div key={item.q} className="qa">
-                <button type="button">
+            {faqItems.map((item, index) => {
+              const isOpen = openFaq === index;
+              return (
+              <div key={item.q} className={`qa${isOpen ? ' open' : ''}`} data-controlled>
+                <button
+                  type="button"
+                  aria-expanded={isOpen}
+                  aria-controls={`pricing-faq-${index}`}
+                  onClick={() => setOpenFaq(isOpen ? null : index)}
+                >
                   {item.q}
                   <span className="q-ico">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
@@ -339,9 +372,16 @@ export default function LandingPricing() {
                     </svg>
                   </span>
                 </button>
-                <div className="ans"><p>{item.a}</p></div>
+                <div
+                  id={`pricing-faq-${index}`}
+                  className="ans"
+                  style={{ maxHeight: isOpen ? 240 : 0 }}
+                >
+                  <p>{item.a}</p>
+                </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
